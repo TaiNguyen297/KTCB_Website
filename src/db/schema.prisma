@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MemberRegistration {
+  id                  Int                      @id @default(autoincrement())
+  status              MemberRegistrationStatus @default(REVIEWING)
+  fullName            String
+  birthday            DateTime
+  phoneNumber         String
+  email               String
+  address             String
+  workPlace           String
+  hasSocialActivities Boolean
+  memories            String
+  position            Position                 @relation(fields: [positionId], references: [id])
+  positionId          Int
+  hopeToReceive       String
+  interviewTime       DateTime                 @default(now())
+  linkGGmeet          String                   @default("https://meet.google.com/gmp-mnvm-obt")
+  test                String                  
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+}
+
+model DonorRegistration {
+  id             Int            @id @default(autoincrement())
+  fullName       String
+  birthday       DateTime
+  phoneNumber    String
+  email          String
+  kindOfDonation kindOfDonation
+  donationImage  String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+model Position {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  memberRegistration MemberRegistration[]
+}
+
+model Member {
+  id           Int      @id @default(autoincrement())
+  fullName     String
+  birthday     DateTime
+  phoneNumber  String
+  email        String
+  address      String
+  workPlace    String
+  bank         String
+  bankAccount  String
+  avatar       String
+}
+
+enum MemberRegistrationStatus {
+  REVIEWING
+  INTERVIEW
+  PASSED
+  FAILED
+}
+
+enum kindOfDonation {
+  MONEY
+  GOODS
+}

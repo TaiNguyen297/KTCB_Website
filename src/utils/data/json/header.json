@@ -1,0 +1,67 @@
+[
+    {
+      "name": "Giới thiệu",
+      "path": "/khoang-troi-cua-be",
+      "subMenus": [
+        {
+          "name": "Tầm nhìn và sứ mệnh",
+          "path": "/khoang-troi-cua-be#su-menh-ra-doi-va-hoat-dong"
+        },
+        {
+          "name": "Bộ máy tổ chức",
+          "path": "/khoang-troi-cua-be#so-do-bo-may-to-chuc",
+          "subMenu2": [
+            { "name": "Team Cùng Bé Trải Nghiệm", "path": "/cung-be-trai-nghiem" },
+            { "name": "Team Nội Dung", "path": "/noi-dung" },
+            { "name": "Team Truyền Thông", "path": "/truyen-thong" },
+            { "name": "Team Kiến Trúc Sư Tình Nguyện", "path": "/kien-truc-su-tinh-nguyen" },
+            { "name": "Quỹ KTCB", "path": "/quy-ktcb" }
+          ]
+        },
+        {
+          "name": "Thông tin liên hệ",
+          "path": "/khoang-troi-cua-be#thong-tin-lien-he"
+        }
+      ]
+    },
+    {
+      "name": "Chương trình",
+      "path": "/list-news",
+      "subMenus": [
+        { "name": "Dự án Cùng Bé Trải Nghiệm", "path": "/teams/cung-be-trai-nghiem" },
+        { "name": "Dự án Kiến Trúc Sư Tình Nguyện", "path": "/teams/kien-truc-su-tinh-nguyen" },
+        { "name": "Các chương trình khác", "path": "/list-news?team=noi-dung" }
+      ]
+    },
+    {
+      "name": "Tài chính",
+      "path": "/list-news?team=quy-ktcb",
+      "subMenus": [
+        { "name": "Báo cáo thu chi", "path": "/list-news?team=quy-ktcb" },
+        { "name": "Sao kê tổng hợp theo tháng", "path": "/sao-ke-tai-khoan-ngan-hang"}
+      ]
+    },
+    {
+      "name": "Bài viết",
+      "path": "/list-news"
+    },
+    {
+      "name": "Tham Gia",
+      "path": "/",
+      "subMenus": [
+        { "name": "Thành viên", "path": "/member-registration"},
+        { "name": "Nhà hảo tâm", "path": "/donor-registration"}
+      ]
+    },
+    {
+      "name": "Nội bộ",
+      "internal": true,
+      "path": "/",
+      "subMenus": [
+        { "name": "Quản lý đơn tuyển", "path": "/recruitment-management"},
+        { "name": "Danh sách thành viên", "path": "/member-list"},
+        { "name": "Quản lý thành viên", "path": "/member-management"},
+        { "name": "Quản lý tài chính", "path": "/expense-management"}
+      ]
+    }
+  ]

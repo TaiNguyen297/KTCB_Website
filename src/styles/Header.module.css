@@ -1,0 +1,6 @@
+.logo {
+  width: 55px;
+  height: auto;
+  border-radius: 50%;
+  box-shadow: rgba(240, 46, 170, 0.4) 2px 2px, rgba(240, 46, 170, 0.3) 4px 4px, rgba(240, 46, 170, 0.2) 6px 6px;
+}

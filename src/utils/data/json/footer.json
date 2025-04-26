@@ -1,0 +1,36 @@
+{
+  "title1": "Địa chỉ",
+  "content1": "Khương Thượng, Đống Đa, Hà Nội",
+  "title2": "Liên hệ",
+  "content2": {
+    "mail": "khoangtroicuabe.kby@gmail.com",
+    "phone": "(+84) 346.535.857"
+  },
+  "logoLink": "/",
+  "facebookLink": "https://www.facebook.com/khoangtroicuabektcb",
+  "youtubeLink": "https://www.youtube.com/channel/UC1whOBKBQJWXzpHLknb1fhw",
+  "tiktokLink": "https://www.tiktok.com/@khoangtroicuabe",
+  "copyright": "© Copyright 2023. All Rights Reserved.",
+  "optionFooter": [
+    {
+      "text": "Giới thiệu",
+      "link": "/khoang-troi-cua-be"
+    },
+    {
+      "text": "Chương trình",
+      "link": "/list-news"
+    },
+    {
+      "text": "Tài chính",
+      "link": "/list-news?team=quy-ktcb"
+    },
+    {
+      "text": "Bài viết",
+      "link": "/list-news"
+    },
+    {
+      "text": "Tham gia",
+      "link": "/member-registration"
+    }
+  ]
+}

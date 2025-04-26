@@ -1,0 +1,22 @@
+[
+  {
+    "value": 1,
+    "label": "Tình nguyện viên",
+    "is_required": true
+  },
+  {
+    "value": 2,
+    "label": "Thành viên ban tổ chức",
+    "is_required": true
+  },
+  {
+    "value": 3,
+    "label": "Thư ký",
+    "is_required": true
+  },
+  {
+    "value": 4,
+    "label": "Chủ tịch",
+    "is_required": true
+  }
+]
