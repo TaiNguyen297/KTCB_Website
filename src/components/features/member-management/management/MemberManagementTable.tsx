@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { MaterialReactTable, MRT_TableOptions, type MRT_ColumnDef } from "material-react-table";
+import { MaterialReactTable, MRT_Row, MRT_TableOptions, type MRT_ColumnDef } from "material-react-table";
 import { useTable } from "@/libs/hooks/useTable";
 import { IconButton, Tooltip, Typography } from "@mui/material";
 import { IOfficialMember } from "@/@types/member";
@@ -16,6 +16,7 @@ import SyncAltIcon from "@mui/icons-material/SyncAlt";
 import { MemberWithPosition } from "@/@types/member";
 import { MODAL_TYPES, useGlobalModalContext } from "../../global-modal/GlobalModal";
 import { useUpdateMember } from "../list/hooks/useUpdateMember";
+import { useDeleteMember } from "../list/hooks/useDeleteMember";
 import MemberPositionKTCB from "@/utils/data/json/position_ktcb.json";
 import TeamKTCB from "@/utils/data/json/team.json";
 
@@ -52,7 +53,9 @@ const MemberManagementTable = (props: { data: MemberWithPosition[] }) => {
 
   const { mutateAsync: updateMember, isLoading: isUpdatingMember } =
     useUpdateMember();
-
+ 
+  const { mutateAsync: deleteMember, isLoading: isDeletingMember } =
+    useDeleteMember();
   const handleOpenModal = (person: MemberWithPosition, action?: ActionType) => {
     openDetail();
     setRowSelected(person);
@@ -161,10 +164,21 @@ const MemberManagementTable = (props: { data: MemberWithPosition[] }) => {
     close();
   };
 
-  const handleOutTeam = () => {
-    showModal(MODAL_TYPES.MODAL_SUCCESS, {
-      context: TEXT_TOAST[ACTIONS["REJECT"]],
-    });
+  const handleOutTeam = async (row: MRT_Row<MemberWithPosition>) => {
+    const memberId = row.original.id;
+    if (!memberId) {
+      console.error("ID không tồn tại trong row.original");
+      return;
+    }
+    try {
+      await deleteMember({ id: memberId });
+      showModal(MODAL_TYPES.MODAL_SUCCESS, {
+        content: TEXT_TOAST[ACTIONS["REJECT"]],
+      });  
+      
+    } catch (error) {
+      console.error("Lỗi khi xóa thành viên:", error);
+    }
   };
 
   const handleSaveUser: MRT_TableOptions<MemberWithPosition>["onEditingRowSave"] =
@@ -176,7 +190,6 @@ const MemberManagementTable = (props: { data: MemberWithPosition[] }) => {
     });
     table.setEditingRow(null); // Thoát chế độ chỉnh sửa
   };
-
 
   const table = useTable({
     columns,
@@ -201,12 +214,12 @@ const MemberManagementTable = (props: { data: MemberWithPosition[] }) => {
 
         <Tooltip title="Rời đội">
           <IconButton
-            onClick={() =>
+            onClick={() => {
               showModal(MODAL_TYPES.MODAL_CONFIRM, {
                 content: TEXT_CONFIRM[ACTIONS["REJECT"]],
-                onConfirm: handleOutTeam,
-              })
-            }
+                onConfirm: () => handleOutTeam(row),
+              });
+            }}
           >
             <ClearIcon />
           </IconButton>

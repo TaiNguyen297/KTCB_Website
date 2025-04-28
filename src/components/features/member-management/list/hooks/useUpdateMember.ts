@@ -7,7 +7,7 @@ export const useUpdateMember = () => {
   return useMutation({
     mutationFn: async (member: MemberPositionDto) => {
       const response = await fetch("/api/member_management", {
-        method: "PATCH",
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(member),
       });

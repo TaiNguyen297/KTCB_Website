@@ -7,6 +7,10 @@ export interface MemberPositionDto {
     teamId: number;
 }
 
+export interface deleteMemberDto { 
+    id: number;
+}
+
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse
@@ -38,27 +42,44 @@ export default async function handler(
 
                 return res.status(200).json(member);
 
-            case "PATCH":
-                const data: MemberPositionDto = req.body;
-
-                if(!data || typeof data.id !== 'number' || typeof data.positionId !== 'number' || typeof data.teamId !== 'number') {
-                        
-                        res.status(400).json({ message: "ID not found" });
-                        return;
+                case "PUT":
+                    const data: MemberPositionDto = req.body;
+                  
+                    if (!data || typeof data.id !== "number") {
+                      return res.status(400).json({ message: "ID is required" });
                     }
-
-                const updatedMember = await prisma.member.update({
-                        
-                        where: {
-                            id: data.id
-                        },
-                        data: {
-                           positionId: data.positionId,
-                           teamId: data.teamId,
-                        },
+                  
+                    const updateData: any = {};
+                    if (typeof data.teamId === "number") {
+                      updateData.teamId = data.teamId;
+                    }
+                    if (typeof data.positionId === "number") {
+                      updateData.positionId = data.positionId;
+                    }
+                  
+                    if (Object.keys(updateData).length === 0) {
+                      return res.status(400).json({ message: "No fields to update" });
+                    }
+                  
+                    const updatedMember = await prisma.member.update({
+                      where: { id: data.id },
+                      data: updateData,
                     });
-
+                    console.log("Payload nhận được:", req.body);
+                    console.log("Payload nhận được:", updatedMember);
                     return res.status(200).json(updatedMember);
+
+                case "PATCH":  
+                    const deleteData: deleteMemberDto = req.body;
+
+                    const deleteMember = await prisma.member.delete({
+                            
+                            where: {
+                                id: deleteData.id,
+                            },
+                        });
+                        console.log("Payload nhận được:", req.body);    
+                    return res.status(200).json(deleteMember);
 
             default:
                 return res.status(405).end();
