@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 export interface IMember {
   full_name: string;
   birthday: string;
@@ -23,3 +24,8 @@ export interface IOfficialMember {
 }
 
 export interface IDonor {}
+import { Prisma } from '@prisma/client';
+
+export type MemberWithPosition = Prisma.MemberGetPayload<{
+  include: { position: true, team: true }
+}>

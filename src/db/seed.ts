@@ -45,6 +45,29 @@ async function main() {
       name: 'Chủ tịch',
     },
   });
+
+  /// seed teams
+  await prisma.team.upsert({
+    where: { id: 1 },
+    update: {name: 'Truyền thông'},
+    create: {
+      name: 'Truyền thông',
+    },
+  });
+  await prisma.team.upsert({
+    where: { id: 2 },
+    update: { name:'Kiến trúc sư tình nguyện' },
+    create: {
+      name: 'Kiến trúc sư tình nguyện',
+    },
+  });
+  await prisma.team.upsert({
+    where: { id: 3 },
+    update: {},
+    create: {
+      name: 'Cùng bé trải nghiệm',
+    },
+  });
 }
 
 main()

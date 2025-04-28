@@ -1,0 +1,14 @@
+[
+    {
+        "value": 1,
+        "label" : "Team truyền thông"
+    },
+    {
+        "value": 2,
+        "label": "Kiến trúc sư tình nguyện"
+    },
+    {
+        "value": 3,
+        "label": "Cùng bé trải nghiệm"
+    } 
+]

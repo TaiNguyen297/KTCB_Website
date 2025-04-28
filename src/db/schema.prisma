@@ -32,7 +32,7 @@ model MemberRegistration {
   hopeToReceive       String
   interviewTime       DateTime                 @default(now())
   linkGGmeet          String                   @default("https://meet.google.com/gmp-mnvm-obt")
-  test                String                  
+  test                String
   createdAt           DateTime                 @default(now())
   updatedAt           DateTime                 @updatedAt
 }
@@ -53,19 +53,30 @@ model Position {
   id                 Int                  @id @default(autoincrement())
   name               String
   memberRegistration MemberRegistration[]
+  Member             Member[]
+}
+
+model Team {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  Member             Member[]
 }
 
 model Member {
-  id           Int      @id @default(autoincrement())
-  fullName     String
-  birthday     DateTime
-  phoneNumber  String
-  email        String
-  address      String
-  workPlace    String
-  bank         String
-  bankAccount  String
-  avatar       String
+  id          Int      @id @default(autoincrement())
+  fullName    String
+  birthday    DateTime
+  phoneNumber String
+  email       String
+  address     String
+  position    Position @relation(fields: [positionId], references: [id])
+  positionId  Int
+  team        Team     @relation(fields: [teamId], references: [id])
+  teamId      Int
+  workPlace   String
+  bank        String
+  bankAccount String
+  avatar      String
 }
 
 enum MemberRegistrationStatus {

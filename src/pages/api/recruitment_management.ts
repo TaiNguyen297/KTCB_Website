@@ -6,6 +6,7 @@ import mailMemberInterviewPass from "@/mailer/templates/recruit-members/member-i
 import mailMemberInterviewFail from "@/mailer/templates/recruit-members/member-interview-fail";
 import mailMemberFormPass from "@/mailer/templates/recruit-members/member-form-pass";
 import mailMemberFormFail from "@/mailer/templates/recruit-members/member-form-fail";
+import { parse } from "path";
 
 export interface UpdateMemberRegistrationDto {
   id: number;
@@ -92,9 +93,18 @@ export default async function handler(
               email: registration.email,
               address: registration.address,
               workPlace: registration.workPlace,
+              positionId: registration.positionId,
+              teamId: 1,
               bank: "", 
               bankAccount: "",
               avatar: "", 
+            },
+            include: {
+              position: {
+                select: {
+                  name: true,
+                },
+              },
             },
           });
 
