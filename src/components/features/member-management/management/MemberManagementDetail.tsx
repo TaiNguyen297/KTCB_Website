@@ -5,12 +5,13 @@ import { ActionType } from "@/@types/common";
 
 import ClearIcon from "@mui/icons-material/Clear";
 import { ACTIONS } from "@/utils/constants";
+import { MemberWithPosition } from "@/@types/member";
 
 interface Props {
-  data: IMemberManagement;
+  data: MemberWithPosition;
   open: boolean;
   onClose: () => void;
-  handleOpenModal: (person: IMemberManagement, action?: ActionType) => void;
+  // handleOpenModal: (person: IMemberManagement, action?: ActionType) => void;
 }
 
 const classNameCol = "md:col-span-1 xs:col-span-2";
@@ -19,7 +20,7 @@ export const MemberManagementDetail: React.FC<Props> = ({
   data,
   onClose,
   open,
-  handleOpenModal,
+  // handleOpenModal,
 }) => {
   return (
     <Modal open={open} onClose={onClose}>
@@ -28,11 +29,11 @@ export const MemberManagementDetail: React.FC<Props> = ({
           <div className="lg:col-span-2 col-span-6 gap-4 flex flex-col">
             <div className={classNameCol}>
               <span className="font-bold">Họ và tên: </span>
-              {data.full_name}
+              {data.fullName}
             </div>
             <div className={classNameCol}>
               <span className="font-bold">Ngày tháng năm sinh: </span>
-              {data.birthday}
+              {new Date(data.birthday).toLocaleDateString("vi")}
             </div>
             <div className={classNameCol}>
               <span className="font-bold">Email: </span>
@@ -40,41 +41,41 @@ export const MemberManagementDetail: React.FC<Props> = ({
             </div>
             <div className={classNameCol}>
               <span className="font-bold">Số điện thoại: </span>
-              {data.phone_number}
+              {data.phoneNumber}
             </div>
           </div>
 
           <div className="lg:col-span-2 col-span-6 gap-4 flex flex-col">
             <div className={classNameCol}>
-              <span className="font-bold">Nơi làm việc: </span>
-              {data.work_place}
-            </div>
-            <div className={classNameCol}>
               <span className="font-bold">Địa chỉ: </span>
               {data.address}
             </div>
             <div className={classNameCol}>
+              <span className="font-bold">Nơi làm việc: </span>
+              {data.workPlace}
+            </div>
+            <div className={classNameCol}>
               <span className="font-bold">Team: </span>
-              {data.team}
+              {data.team.name}
             </div>
             <div className={classNameCol}>
               <span className="font-bold">Vị trí: </span>
-              {data.position}
+              {data.position.name}
             </div>
           </div>
 
           <div className="lg:col-span-2 col-span-6 gap-4 flex flex-col">
             <div className={classNameCol}>
               <span className="font-bold">Ngân hàng: </span>
-              {data.bank_name}
+              {data.bank}
             </div>
 
             <div className={classNameCol}>
               <span className="font-bold">Số tài khoản ngân hàng: </span>
-              {data.bank_account}
+              {data.bankAccount}
             </div>
 
-            <div className="flex items-center justify-center min-w-">
+            {/* <div className="flex items-center justify-center min-w-">
               <Tooltip title="Rời đội">
                 <IconButton
                   onClick={() => {
@@ -84,7 +85,7 @@ export const MemberManagementDetail: React.FC<Props> = ({
                   <ClearIcon />
                 </IconButton>
               </Tooltip>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

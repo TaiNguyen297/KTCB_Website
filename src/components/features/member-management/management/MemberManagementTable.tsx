@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
+import { MaterialReactTable, MRT_TableOptions, type MRT_ColumnDef } from "material-react-table";
 import { useTable } from "@/libs/hooks/useTable";
 import { IconButton, Tooltip, Typography } from "@mui/material";
 import { IOfficialMember } from "@/@types/member";
@@ -12,11 +12,23 @@ import ToastSuccess from "@/components/shared/toasts/ToastSuccess";
 import { ModalConfirm } from "@/components/shared/modals";
 import { MemberManagementDetail } from "./MemberManagementDetail";
 import { EllipsisCell } from "@/components/shared/table";
+import SyncAltIcon from "@mui/icons-material/SyncAlt";
+import { MemberWithPosition } from "@/@types/member";
+import { MODAL_TYPES, useGlobalModalContext } from "../../global-modal/GlobalModal";
+import { useUpdateMember } from "../list/hooks/useUpdateMember";
+import MemberPositionKTCB from "@/utils/data/json/position_ktcb.json";
+import TeamKTCB from "@/utils/data/json/team.json";
+
+import { SelectBox } from "@/components/shared/inputs/select/SelectBox";
 
 export interface IMemberManagement extends IOfficialMember {
   team?: string;
   position?: string;
+  positionId?: string;
+  teamId?: string;
+  id: string;
 }
+
 
 const TEXT_TOAST = {
   [ACTIONS["REJECT"]]: "Xác nhận yêu cầu thành viên rời đội thành công",
@@ -26,117 +38,118 @@ const TEXT_CONFIRM = {
   [ACTIONS["REJECT"]]: "Xác nhận yêu cầu thành viên RỜI ĐỘI",
 };
 
-const data: IMemberManagement[] = [
-  {
-    full_name: "123",
-    email: "Kentucky_dai_dai_dai_ktcb@gmail.com",
-    birthday: "27/02/2001",
-    phone_number: "0334455667",
-    address: "144 Xuan Thuy",
-    work_place: "144 Xuan Thuy",
-    bank_account: "123456789",
-    team: "Cùng bé trải nghiệm",
-    position: "Tình nguyện viên",
-    bank_name: "ACB",
-  },
-  {
-    full_name: "123",
-    email: "Ohio@gmail.com",
-    birthday: "27/02/2001",
-    phone_number: "0334455667",
-    address: "144 Xuan Thuy",
-    work_place: "144 Xuan Thuy",
-    bank_account: "123456789",
-    team: "Cùng bé trải nghiệm",
-    position: "Tình nguyện viên",
-    bank_name: "ACB",
-  },
-  {
-    full_name: "123",
-    email: "West Virginia@gmail.com",
-    birthday: "27/02/2001",
-    phone_number: "0334455667",
-    address: "144 Xuan Thuy",
-    work_place: "144 Xuan Thuy",
-    bank_account: "123456789",
-    team: "Cùng bé trải nghiệm",
-    position: "Tình nguyện viên",
-    bank_name: "ACB",
-  },
-  {
-    full_name: "123",
-    email: "Nebraska@gmail.com",
-    birthday: "27/02/2001",
-    phone_number: "0334455667",
-    address: "144 Xuan Thuy",
-    work_place: "144 Xuan Thuy",
-    bank_account: "123456789",
-    team: "Cùng bé trải nghiệm",
-    position: "Tình nguyện viên",
-    bank_name: "ACB",
-  },
-  {
-    full_name: "Xin chào các bạn tên của tôi là Xuân Thủy",
-    email: "Nebraska@gmail.com",
-    birthday: "27/02/2001",
-    phone_number: "0334455667",
-    address: "144 Xuan Thuy",
-    work_place: "144 Xuan Thuy",
-    bank_account: "123456789",
-    team: "Cùng bé trải nghiệm công viên thủy tinh",
-    position: "Tình nguyện viên",
-    bank_name: "ACB",
-  },
-];
-
-const MemberManagementTable = () => {
+const MemberManagementTable = (props: { data: MemberWithPosition[] }) => {
+  const { data } = props;
+  const { showModal } = useGlobalModalContext();
   const [opened, { open, close }] = useDisclosure();
   const [openedDetail, { open: openDetail, close: closeDetail }] =
     useDisclosure();
 
   const [openToast, setOpenToast] = useState(false);
 
-  const [rowSelected, setRowSelected] = useState<IMemberManagement>();
+  const [rowSelected, setRowSelected] = useState<MemberWithPosition>();
   const [action, setAction] = useState<ActionType>();
 
-  const handleOpenModal = (person: IMemberManagement, action?: ActionType) => {
-    action ? open() : openDetail();
+  const { mutateAsync: updateMember, isLoading: isUpdatingMember } =
+    useUpdateMember();
 
+  const handleOpenModal = (person: MemberWithPosition, action?: ActionType) => {
+    openDetail();
     setRowSelected(person);
-    setAction(action);
+    setAction(action)
   };
 
-  const columns = useMemo<MRT_ColumnDef<IMemberManagement>[]>(
+  const columns = useMemo<MRT_ColumnDef<MemberWithPosition>[]>(
     () => [
       {
-        accessorKey: "full_name",
+        accessorKey: "fullName",
         header: "Họ và tên",
+        enableEditing: false,
         size: 200,
         Cell: (props) => <EllipsisCell {...props} />,
       },
       {
-        accessorKey: "birthday",
+        accessorFn: (rowData: any) =>
+          new Date(rowData.birthday).toLocaleDateString("vi"),
+        id: "birthday",
         header: "Ngày sinh",
+        enableEditing: false,
         size: 200,
         Cell: (props) => <EllipsisCell {...props} />,
       },
       {
-        accessorKey: "phone_number",
+        accessorKey: "email",
+        header: "Email",
+        enableEditing: false,
+        size: 200,
+        Cell: (props) => <EllipsisCell {...props} />,
+      },
+      {
+        accessorKey: "phoneNumber",
         header: "Số điện thoại",
+        enableEditing: false,
         size: 200,
         Cell: (props) => <EllipsisCell {...props} />,
       },
       {
-        accessorKey: "team",
+        accessorKey: "team.name",
         header: "Team",
         size: 200,
         Cell: (props) => <EllipsisCell {...props} />,
+        Edit: (props) => {
+          const label = props.cell.getValue();
+
+          return (
+            <SelectBox
+              value={
+                TeamKTCB.find((p) => p.label === label)
+                  ?.value as unknown as string
+              }
+              onChange={(value: string | number): void => {
+                props.row._valuesCache = {
+                  ...props.row._valuesCache,
+                  teamId: Number(value),
+                  id: props.row.original.id, // Ghi đè teamId bằng value mới
+                };
+                
+              }}
+              fullWidth
+              options={TeamKTCB}
+              placeholder="Chọn team ứng tuyển"
+              {...props}
+            />
+          );
+        },
       },
       {
-        accessorKey: "position",
+        accessorKey: "position.name",
         header: "Vị trí",
         size: 200,
         Cell: (props) => <EllipsisCell {...props} />,
+        Edit: (props) => {
+          const label = props.cell.getValue();
+
+          return (
+            <SelectBox
+              value={
+                MemberPositionKTCB.find((p) => p.label === label)
+                  ?.value as unknown as string
+              }
+              onChange={(value: string | number): void => {
+                props.row._valuesCache = {
+                  ...props.row._valuesCache,
+                  positionId: Number(value),
+                  id: props.row.original.id,
+                };
+            
+              }}
+              fullWidth
+              options={MemberPositionKTCB}
+              placeholder="Chọn vị trí"
+              {...props}
+            />
+          );
+        },
       },
     ],
     []
@@ -148,11 +161,28 @@ const MemberManagementTable = () => {
     close();
   };
 
+  const handleOutTeam = () => {
+    showModal(MODAL_TYPES.MODAL_SUCCESS, {
+      context: TEXT_TOAST[ACTIONS["REJECT"]],
+    });
+  };
+
+  const handleSaveUser: MRT_TableOptions<MemberWithPosition>["onEditingRowSave"] =
+  async ({ values, table }) => {
+    await updateMember({
+      id: Number(values.id),
+      teamId: Number(values.teamId),
+      positionId: Number(values.positionId),
+    });
+    table.setEditingRow(null); // Thoát chế độ chỉnh sửa
+  };
+
+
   const table = useTable({
     columns,
-    data,
+    data: data || [],
     enableRowActions: true,
-
+    onEditingRowSave: handleSaveUser,
     renderTopToolbar: () => <div />,
     renderBottomToolbar: () => <div />,
     renderRowActions: ({ row }) => (
@@ -163,10 +193,19 @@ const MemberManagementTable = () => {
           </IconButton>
         </Tooltip>
 
+        <Tooltip title="Chỉnh sửa vị trí">
+          <IconButton onClick={() => table.setEditingRow(row)}>
+            <SyncAltIcon />
+          </IconButton>
+        </Tooltip>
+
         <Tooltip title="Rời đội">
           <IconButton
             onClick={() =>
-              handleOpenModal(row.original, ACTIONS["REJECT"] as ActionType)
+              showModal(MODAL_TYPES.MODAL_CONFIRM, {
+                content: TEXT_CONFIRM[ACTIONS["REJECT"]],
+                onConfirm: handleOutTeam,
+              })
             }
           >
             <ClearIcon />
@@ -175,6 +214,9 @@ const MemberManagementTable = () => {
       </div>
     ),
     positionActionsColumn: "last",
+    state: {
+      isSaving: isUpdatingMember,
+    },
   });
 
   return (
@@ -204,7 +246,6 @@ const MemberManagementTable = () => {
           open={openedDetail}
           onClose={closeDetail}
           data={rowSelected!}
-          handleOpenModal={handleOpenModal}
         />
       )}
     </div>

@@ -1,10 +1,10 @@
 import React from "react";
 import { IMemberList } from "./MemberListTable";
 import { Modal } from "@mui/material";
-import { Member } from "@prisma/client";
+import { MemberWithPosition } from "@/@types/member";
 
 interface Props {
-  data: Member;
+  data: MemberWithPosition;
   open: boolean;
   onClose: () => void;
 }
@@ -44,14 +44,14 @@ export const MemberDetail: React.FC<Props> = ({ data, onClose, open }) => {
               <span className="font-bold">Địa chỉ: </span>
               {data.address}
             </div>
-            {/* <div className={classNameCol}>
+            <div className={classNameCol}>
               <span className="font-bold">Team: </span>
-              {data.team}
+              {data.team.name}
             </div>
             <div className={classNameCol}>
               <span className="font-bold">Vị trí: </span>
-              {data.position}
-            </div> */}
+              {data.position.name}
+            </div>
           </div>
 
           <div className="lg:col-span-2 col-span-6 gap-4 flex flex-col">

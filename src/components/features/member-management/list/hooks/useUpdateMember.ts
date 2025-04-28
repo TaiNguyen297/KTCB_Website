@@ -1,24 +1,27 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { IMemberList } from "../MemberListTable";
+import { MemberPositionDto } from "@/pages/api/member_management";
 
 export const useUpdateMember = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (member: IMemberList) => {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); 
-      return Promise.resolve();
+    mutationFn: async (member: MemberPositionDto) => {
+      const response = await fetch("/api/member_management", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(member),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      return response.json();
     },
 
-    onMutate: (newMemberInfo: IMemberList) => {
-      queryClient.setQueryData(["members"], (prevUsers: any) =>
-        prevUsers?.map((prevUser: IMemberList) =>
-          prevUser.full_name === newMemberInfo.full_name
-            ? newMemberInfo
-            : prevUser
-        )
-      );
+    onSuccess: () => {
+      // invalidate lại để memberList tự động reload
+      queryClient.invalidateQueries(["memberList"]);
     },
-
   });
 };
