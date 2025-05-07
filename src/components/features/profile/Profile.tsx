@@ -1,18 +1,26 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ProfileInputSchema, ProfileInputType } from "./types";
 import { Button, Typography } from "@mui/material";
 import ktcbBackground from "@public/mission-background.jpg";
-
 import { Controller } from "react-hook-form";
 import { Grid } from "@mui/material";
 import { Input, SelectBox } from "@/components/shared/inputs";
 import { DatePicker } from "@/components/shared/inputs/time-picker";
 import { ContainerXL } from "@/components/layouts/ContainerXL";
-import ToastSuccess from "@/components/shared/toasts/ToastSuccess";
 import { useRouter } from "next/router";
 import { BANKS } from "@/utils/constants";
+import { Member } from "@prisma/client";
+import { useUpdateProfile } from "./hooks/useUpdateProfile";
+import {
+  MODAL_TYPES,
+  useGlobalModalContext,
+} from "../global-modal/GlobalModal";
+
+interface Props {
+  me: Member;
+}
 
 const COL_SPAN = {
   xs: 12,
@@ -20,19 +28,20 @@ const COL_SPAN = {
   md: 4,
 };
 
-export const Profile = () => {
+export const Profile: React.FC<Props> = ({ me }) => {
   const router = useRouter();
-  const [open, setOpen] = React.useState(false);
-
+  const { showModal } = useGlobalModalContext();
   const {
     control,
     handleSubmit,
+    setValue,
+    reset,
     formState: { errors, isDirty },
   } = useForm<ProfileInputType>({
     resolver: zodResolver(ProfileInputSchema),
     defaultValues: {
       full_name: "",
-      birthday: Date.now(),
+      birthday : new Date(),
       phone_number: "",
       email: "",
       address: "",
@@ -42,10 +51,33 @@ export const Profile = () => {
     },
   });
 
+  const mutate = useUpdateProfile();
+
+  useEffect(() => {
+    if (me) {
+      setValue("full_name", me?.fullName);
+      setValue("email", me?.email);
+      if (me?.birthday) {
+        setValue("birthday", new Date(me?.birthday));
+      }
+      setValue("address", me?.address || "");
+      setValue("bank", me?.bank || "");
+      setValue("bank_account", me?.bankAccount || "");
+      setValue("phone_number", me?.phoneNumber || "");
+      setValue("work_place", me?.workPlace || "");
+    }
+  }, [me, setValue]);
+
   const onSubmit = handleSubmit((data) => {
     console.log(data);
+    mutate.mutateAsync({ ...data, id: me.id });
 
-    setOpen(true);
+    showModal(MODAL_TYPES.MODAL_SUCCESS, {
+      heading: "Xác nhận thành công",
+      content: "Cảm ơn đã gửi thông tin",
+    });
+
+    reset();
   });
 
   return (
@@ -58,12 +90,6 @@ export const Profile = () => {
       }}
     >
       <div className="flex flex-col mt-9 gap-4">
-        <ToastSuccess
-          open={open}
-          onClose={() => setOpen(false)}
-          heading="Xác nhận thành công"
-          content="Cảm ơn đã gửi thông tin"
-        />
         <div className="flex justify-center items-center gap-2">
           <Button
             variant="contained"

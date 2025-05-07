@@ -65,12 +65,12 @@ const Header = () => {
             alignItems="center"
             spacing={7}
           >
-            {/* {menuData.filter((menu) => session || !menu.internal).map((menu, index) => (
-              <MenuSection key={`${index}menu`} menuData={menu} />
-            ))} */}
-            {menuData.map((menu, index) => (
+            {menuData.filter((menu) => session || !menu.internal).map((menu, index) => (
               <MenuSection key={`${index}menu`} menuData={menu} />
             ))}
+            {/* {menuData.map((menu, index) => (
+              <MenuSection key={`${index}menu`} menuData={menu} />
+            ))} */}
           </Stack>
         </Box>
 

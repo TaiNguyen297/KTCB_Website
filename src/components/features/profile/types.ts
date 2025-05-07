@@ -13,7 +13,7 @@ export const ProfileInputSchema = z.object({
     .max(255, {
       message: maxLengthMessage("Họ và tên"),
     }),
-  birthday: z.any(),
+  birthday: z.date(),
   email: z
     .string()
     .min(1, {
