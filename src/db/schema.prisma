@@ -12,6 +12,10 @@ model User {
   username  String   @unique
   email     String   @unique
   password  String
+  member    Member?  @relation(fields: [memberId], references: [id])
+  memberId  Int?     @unique
+  role      Role     @relation(fields: [roleId], references: [id])  // Thêm quan hệ với Role
+  roleId    Int      // Trường bắt buộc (không optional)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -57,9 +61,23 @@ model Position {
 }
 
 model Team {
-  id                 Int                  @id @default(autoincrement())
-  name               String
-  Member             Member[]
+  id     Int      @id @default(autoincrement())
+  name   String
+  Member Member[]
+}
+
+model Role {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  users       User[]       // Quan hệ 1-n với User
+  permissions Permission[] // Quan hệ n-n với Permission
+}
+
+
+model Permission {
+  id          Int    @id @default(autoincrement())
+  name        String @unique   // Ví dụ: "CREATE_USER", "EDIT_POST"
+  roles       Role[]           // Quan hệ n-n với Role
 }
 
 model Member {
@@ -77,6 +95,7 @@ model Member {
   bank        String
   bankAccount String
   avatar      String
+  User        User?
 }
 
 enum MemberRegistrationStatus {
