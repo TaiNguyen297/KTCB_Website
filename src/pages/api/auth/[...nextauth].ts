@@ -1,10 +1,13 @@
 import prisma from "@/libs/prisma";
 import { isPasswordValid } from "@/utils/hash";
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-export const authOptions = {
-  secret: process.env.NEXTAUTH_SECRET,
+export const authOptions: NextAuthOptions = {
+  pages: {
+    signIn: "/login", // Trang đăng nhập
+  },
+  secret: process.env.NEXTAUTH_SECRET, // Bảo mật
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -12,34 +15,55 @@ export const authOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      //@ts-ignore
       async authorize(credentials) {
-        const { email, password } = credentials as any;
+        console.log("Credentials received:", credentials);
+        const { email, password } = credentials as { email: string; password: string };
+
+        // Tìm người dùng trong database
         const user = await prisma.user.findFirst({
           where: { email: email },
         });
 
         if (!user) {
+          console.error("User not found");
           return null;
         }
 
+        // Kiểm tra mật khẩu
         const isPasswordMatch = await isPasswordValid(password, user.password);
-
         if (!isPasswordMatch) {
+          console.error("Invalid password");
           return null;
         }
 
-        return user;
+        // Trả về thông tin người dùng
+        return {
+          id: user.id.toString(),
+          email: user.email,
+          name: user.username,
+        };
       },
     }),
   ],
-};
-
-export default NextAuth({
   callbacks: {
-    async session({ session, token, user }) {
-      return session; // The return type will match the one returned in `useSession()`
+    async jwt({ token, user }) {
+      // Thêm thông tin người dùng vào token
+      if (user) {
+        token.email = user.email;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      // Thêm thông tin từ token vào session
+      if (token) {
+        session.user = {
+          ...session.user,
+          email: token.email as string,
+        };
+      }
+      return session;
     },
   },
-  ...authOptions,
-});
+};
+
+export default NextAuth(authOptions);

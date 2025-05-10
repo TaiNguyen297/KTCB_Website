@@ -19,13 +19,16 @@ import { getMemberRegistration, getPersonInterview } from "@/components/features
 
 const RecruitmentManagementPage = () => {
   const [open, setOpen] = useState(false);
-  // const { data: session } = useSession({
-  //   required: true,
-  //   onUnauthenticated() {
-  //     router.push("/login");
-  //   },
-  // });
-  // const router = useRouter();
+  const { data: session } = useSession({
+    required: true,
+    onUnauthenticated() {
+      router.push("/login");
+    },
+  });
+
+  console.log(session);
+  
+  const router = useRouter();
 
   const { watch, setValue } = useForm<{ tabIndex: number }>({
     defaultValues: {
@@ -61,14 +64,14 @@ const RecruitmentManagementPage = () => {
     },
   ];
 
-  // if (!session) {
-  //   return (
-  //     <div>
-  //       {/* TODO: Them icon loading */}
-  //       Đang tải...
-  //     </div>
-  //   );
-  // }
+  if (!session) {
+    return (
+      <div>
+        {/* TODO: Them icon loading */}
+        Đang tải...
+      </div>
+    );
+  }
 
   return (
     <ContainerXL>

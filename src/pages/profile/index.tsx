@@ -26,8 +26,20 @@ export default ProfilePage;
 
 export async function getServerSideProps(context: any) {
   const session = await getServerSession(context.req, context.res, authOptions);
+  console.log("Session:", session);
+  console.log("Session User Email:", session?.user?.email);
+
+  if (!session?.user?.email) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
+
   const me = await prisma.member.findFirst({
-    where: { email: session?.user?.email },
+    where: { email: session.user.email },
     select: {
       id: true,
       fullName: true,
@@ -40,6 +52,14 @@ export async function getServerSideProps(context: any) {
       workPlace: true,
     },
   });
+
+  console.log("User Data:", me);
+
+  if (!me) {
+    return {
+      notFound: true,
+    };
+  }
 
   return {
     props: {
