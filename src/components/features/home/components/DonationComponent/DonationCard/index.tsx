@@ -44,15 +44,15 @@ const DonationCard: React.FC<Props> = ({ event}) => {
         <Typography variant="h6" sx={{ fontWeight: "bold", color: "text.primary", mb: 1, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden", WebkitLineClamp: 2 }}>
           {event.title}
         </Typography>
-        <Typography variant="body2" sx={{ color: "text.secondary", display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden", WebkitLineClamp: 3 }}>
+        <Typography variant="body2" sx={{ color: "text.secondary",  mb: 1, display: "-webkit-box", WebkitBoxOrient: "vertical", overflow: "hidden", WebkitLineClamp: 3 }}>
           {event.description}
         </Typography>
-        <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
+        <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1,  mb: 1, color: "text.secondary" }}>
           <Typography variant="body2">
             {formatDate(event.startDate)} - {formatDate(event.endDate)}
           </Typography>
         </Box>
-         <Box>
+         <Box sx={{ mt: 2, alignItems: "center", gap: 1, mb: 1 }}>
           <LinearProgress
             variant="determinate"
             value={event.progress}

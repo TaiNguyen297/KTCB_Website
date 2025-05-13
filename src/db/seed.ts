@@ -5,42 +5,42 @@ const prisma = new PrismaClient()
 
 async function main() {
   // seed users
-  const password = await hash("ktcbtest", 12);
-  const user = await prisma.user.create({
-    data: {
-      username: "Nguyen Van A",
-      email: "tainguyen29702@gmail.com",
-      password: password,
-      member: {
-        connect: { id: 1 },
-      },
-      role: {
-        connect: { name: "CHAIRMAN" }, 
-      }
+  // const password = await hash("ktcbtest", 12);
+  // const user = await prisma.user.create({
+  //   data: {
+  //     username: "Nguyen Van A",
+  //     email: "tainguyen29702@gmail.com",
+  //     password: password,
+  //     member: {
+  //       connect: { id: 1 },
+  //     },
+  //     role: {
+  //       connect: { name: "CHAIRMAN" }, 
+  //     }
 
-    }
-  });
-  console.log({ user });
+  //   }
+  // });
+  // console.log({ user });
 
-  const member = await prisma.member.create({
-    data: {
-      fullName: "KTCB Admin",
-      email: "tainguyen29702@gmail.com",
-      phoneNumber: "0987654321",
-      birthday: new Date("2000-01-01"),
-      address: "Hà Nội",
-      bank: "Vietcombank",
-      bankAccount: "123456789",
-      workPlace: "Hà Nội",
-      avatar: "default-avatar.png", // Example avatar
-      position: {
-        connect: { id: 1 }, // Connect to an existing position by ID
-      },
-      team: {
-        connect: { id: 1 }, // Connect to an existing team by ID
-      },
-    },
-  });
+  // const member = await prisma.member.create({
+  //   data: {
+  //     fullName: "KTCB Admin",
+  //     email: "tainguyen29702@gmail.com",
+  //     phoneNumber: "0987654321",
+  //     birthday: new Date("2000-01-01"),
+  //     address: "Hà Nội",
+  //     bank: "Vietcombank",
+  //     bankAccount: "123456789",
+  //     workPlace: "Hà Nội",
+  //     avatar: "default-avatar.png", // Example avatar
+  //     position: {
+  //       connect: { id: 1 }, // Connect to an existing position by ID
+  //     },
+  //     team: {
+  //       connect: { id: 1 }, // Connect to an existing team by ID
+  //     },
+  //   },
+  // });
 
   const permissions = await prisma.permission.createMany({
     data: [
@@ -67,6 +67,19 @@ async function main() {
       { name: 'SHARE_POSTS' }
     ],
     skipDuplicates: true
+  });
+
+  const event = await prisma.volunteerEvents.create({ 
+    data: {
+      title: "KTCB Volunteer Event",
+      description: "A volunteer event organized by KTCB.",
+      date: new Date("2023-01-01"),
+      location: "Hanoi, Vietnam",
+      status: "UPCOMING",
+      mapLink: "https://maps.google.com",
+      image: "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482552zrD/anh-mo-ta.png",
+
+    },
   });
 
   // 3. Tạo các Role và gán Permission

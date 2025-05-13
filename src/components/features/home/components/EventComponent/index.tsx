@@ -8,62 +8,7 @@ import "swiper/css/autoplay";
 import { Pagination, Autoplay, Navigation } from "swiper/modules";
 import ktcbBackground from "../../../../../../public/posts-background.jpg";
 
-const VolunteerEventComponent = ({ }) => {
-    const eventsData = {
-        volunteerEvents: [
-            {
-                id: "1",
-                title: "Sự kiện tình nguyện 1",
-                poster: "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482552zrD/anh-mo-ta.png",
-                location: "Địa điểm 1",
-                status: "UPCOMING",
-                locationLink: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.1234567890123!2d-122.12345678901234!3d37.123456789012345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8085801234567890%3A0x1234567890123456!2sLocation%20Name!5e0!3m2!1sen!2sus!4v1234567890123",
-                description: "lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                eventDate: "Ngày 1",
-            },
-            {
-                id: "2",
-                title: "Sự kiện tình nguyện 1",
-                poster: "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482552zrD/anh-mo-ta.png",
-                location: "Địa điểm 1",
-                status: "UPCOMING",
-                locationLink: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.1234567890123!2d-122.12345678901234!3d37.123456789012345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8085801234567890%3A0x1234567890123456!2sLocation%20Name!5e0!3m2!1sen!2sus!4v1234567890123",
-                description: "lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                eventDate: "Ngày 1",
-            },
-            {
-                id: "3",
-                title: "Sự kiện tình nguyện 1",
-                poster: "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482552zrD/anh-mo-ta.png",
-                location: "Địa điểm 1",
-                status: "UPCOMING",
-                locationLink: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.1234567890123!2d-122.12345678901234!3d37.123456789012345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8085801234567890%3A0x1234567890123456!2sLocation%20Name!5e0!3m2!1sen!2sus!4v1234567890123",
-                description: "lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                eventDate: "Ngày 1",
-            },
-            {
-                id: "4",
-                title: "Sự kiện tình nguyện 1",
-                poster: "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482552zrD/anh-mo-ta.png",
-                location: "Địa điểm 1",
-                status: "ONGOING",
-                locationLink: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.1234567890123!2d-122.12345678901234!3d37.123456789012345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8085801234567890%3A0x1234567890123456!2sLocation%20Name!5e0!3m2!1sen!2sus!4v1234567890123",
-                description: "lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                eventDate: "Ngày 1",
-            },
-            {
-                id: "5",
-                title: "Sự kiện tình nguyện 1",
-                poster: "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482552zrD/anh-mo-ta.png",
-                location: "Địa điểm 1",
-                status: "FINISHED",
-                locationLink: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.1234567890123!2d-122.12345678901234!3d37.123456789012345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8085801234567890%3A0x1234567890123456!2sLocation%20Name!5e0!3m2!1sen!2sus!4v1234567890123",
-                description: "lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                eventDate: "Ngày 1",
-            },
-        ],
-    };
-
+const VolunteerEventComponent =  ({ events }: { events: any[] }) => {
     return (
         <Container
             sx={{
@@ -108,7 +53,7 @@ const VolunteerEventComponent = ({ }) => {
                     1530: { slidesPerView: 4 },
                 }}
             >
-                {eventsData.volunteerEvents.map((event, index) => (
+                {events.map((event, index) => (
                     <SwiperSlide key={index}>
                         <EventCard event={event} />
                     </SwiperSlide>

@@ -5,13 +5,15 @@ import ListNewsHome from "./components/ListNews";
 import { MissionComponent } from "./components/MissionComponent";
 import VolunteerEventComponent from "./components/EventComponent";
 import DonationComponent from "./components/DonationComponent";
-export const HomeContent = () => {
+
+
+export const HomeContent = ({ events }: { events: any[] }) => {
   return (
     <>
       <CoverImageSlide coverImageData={homeBanner} />
       <MissionComponent missionCartData={missionData} />
       <ListNewsHome team="" />
-      <VolunteerEventComponent />
+      <VolunteerEventComponent events={events} />
       <DonationComponent />
     </>
   );

@@ -53,6 +53,31 @@ model DonorRegistration {
   updatedAt      DateTime       @updatedAt
 }
 
+model VolunteerEvents {
+  id  Int    @id @default(autoincrement())
+  title String
+  status  EventStatus  @default(UPCOMING)
+  date    DateTime
+  description String
+  location String
+  mapLink String
+  image   String
+  eventRegistrations   EventRegistration[]
+  
+}
+
+model EventRegistration {
+  id             Int            @id @default(autoincrement())
+  fullName       String
+  birthday       DateTime
+  phoneNumber    String
+  email          String
+  address        String
+  workPlace      String
+  event          VolunteerEvents  @relation(fields: [eventId], references: [id])
+  eventId        Int
+}
+
 model Position {
   id                 Int                  @id @default(autoincrement())
   name               String
@@ -108,4 +133,10 @@ enum MemberRegistrationStatus {
 enum kindOfDonation {
   MONEY
   GOODS
+}
+
+enum EventStatus {
+  UPCOMING
+  ONGOING
+  FINISHED
 }

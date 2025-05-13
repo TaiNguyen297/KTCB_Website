@@ -12,16 +12,17 @@ import { getQuoteByTeam } from "@/utils/common";
 import { Stack, Typography } from "@mui/material";
 import { GetStaticProps, NextPage } from "next";
 import { DefaultSeo } from "next-seo";
+import prisma from "@/libs/prisma";
 
 interface Props {
   quote: QQuote;
 }
 
-const Home: NextPage<Props> = ({ quote }) => {
+const Home: NextPage<Props & { events: any[] }> = ({ quote, events }) => {
   return (
     <>
       <DefaultSeo {...SEO} />
-      <HomeContent />
+      <HomeContent events={events} />
 
       {quote ? (
         <Intro
@@ -58,7 +59,9 @@ export default Home;
 export const getStaticProps: GetStaticProps = async () => {
   try {
     const quote = getQuoteByTeam();
-
+    const events = await prisma.volunteerEvents.findMany({
+      orderBy: { date: "asc" },
+    });
     if (!quote?.title || !quote?.content || !quote?.banner_url) {
       return {
         props: {
@@ -70,6 +73,7 @@ export const getStaticProps: GetStaticProps = async () => {
     return {
       props: {
         quote,
+         events: JSON.parse(JSON.stringify(events)),
       },
     };
   } catch (err) {
@@ -78,6 +82,7 @@ export const getStaticProps: GetStaticProps = async () => {
     return {
       props: {
         quote: {},
+        events: [],
       },
     };
   }
