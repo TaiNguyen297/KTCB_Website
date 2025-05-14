@@ -1,0 +1,9 @@
+export interface IEvent {
+  id: number;
+  title: string;
+  date: string;
+  location: string;
+  locationLink?: string;
+  description: string;
+  status: "UPCOMING" | "ONGOING" | "FINISHED";
+}

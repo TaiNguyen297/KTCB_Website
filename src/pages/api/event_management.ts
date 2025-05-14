@@ -22,7 +22,11 @@ export default async function handler(
             phoneNumber: data.phone_number,
             address: data.address,
             workPlace: data.work_place,
-            eventId: parseInt(data.event_id),
+            event: {
+              connect: {
+                id: data.eventId,
+              },
+            },
           },
           include:{
             event: {
@@ -34,6 +38,23 @@ export default async function handler(
         });
 
         return res.status(201).json(user);
+
+     case "GET": {
+        const { type } = req.query;
+
+        if (type === "event") {
+          const events = await prisma.volunteerEvents.findMany();
+          return res.status(200).json(events);
+        }
+
+        if (type === "registration") {
+          const registrations = await prisma.eventRegistration.findMany();
+          return res.status(200).json(registrations);
+        }
+
+        return res.status(400).json({ message: "Invalid type" });
+      }
+        
       default:
         return res.status(405).end();
     }
