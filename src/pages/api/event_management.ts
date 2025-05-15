@@ -1,5 +1,21 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/libs/prisma";
+import { EventStatus } from "@prisma/client";
+
+export interface DeleteEventDto {
+  id: number;
+}
+
+export interface UpdateEventDto {
+  id: number;
+  title: string;
+  date: Date;
+  location: string;
+  mapLink: string;
+  status: EventStatus;
+  image: string;
+  description: string;
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -53,6 +69,39 @@ export default async function handler(
         }
 
         return res.status(400).json({ message: "Invalid type" });
+      }
+
+      case "PUT": {
+        const data: UpdateEventDto = req.body;
+        if (!data) {
+          return res.status(400).json({ message: "Content not found" });
+        }
+        const event = await prisma.volunteerEvents.update({
+          where: {
+            id: data.id,
+          },
+          data: {
+            title: data.title,
+            date: new Date(data.date),
+            location: data.location,
+            mapLink: data.mapLink,
+            status: data.status,
+            image: data.image,
+            description: data.description,
+          },
+        });
+        return res.status(201).json(event);
+      }
+
+      case "PATCH": {
+          const deleteData : DeleteEventDto = req.body;  
+
+          const deleteEvent = await prisma.volunteerEvents.delete({
+            where: {
+              id: deleteData.id,
+            },
+          });
+          return res.status(200).json(deleteEvent);
       }
         
       default:

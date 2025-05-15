@@ -11,6 +11,7 @@ import { IEvent } from "@/@types/event";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import ClearIcon from "@mui/icons-material/Clear";
 import SyncAltIcon from "@mui/icons-material/SyncAlt";
+import EditIcon from "@mui/icons-material/Edit";
 import { useDisclosure } from "@/libs/hooks/useDisclosure";
 import { ActionType } from "@/@types/common";
 import { ACTIONS } from "@/utils/constants";
@@ -21,10 +22,34 @@ import { useUpdateEvent } from "../event/hooks/useUpdateEvent";
 import { useDeleteEvent } from "../event/hooks/useDeleteEvent";
 import { MODAL_TYPES, useGlobalModalContext } from "../../global-modal/GlobalModal";
 import { EventManagementDetail } from "./EventManagementDetail";
+import { EventEditModal } from "./EventEditModal";
+import { EventStatus } from "@prisma/client";
+import { SelectBox } from "@/components/shared/inputs";
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { EventCreationForm } from "./EventCreationForm";
 
 export interface IEventManagement extends IEvent {
   id: number;
+  title: string;
+  status: EventStatus;
+  date: string;
+  location: string;
+  mapLink: string;
+  image: string;
+  description: string;
 }
+
+interface StatusOption {
+  label: string;
+  value: EventStatus;
+}
+
+const StatusEvent: StatusOption[] = [
+  { label: "Sắp diễn ra", value: EventStatus.UPCOMING },
+  { label: "Đang diễn ra", value: EventStatus.ONGOING },
+  { label: "Đã kết thúc", value: EventStatus.FINISHED },
+];
 
 const TEXT_TOAST = {
   [ACTIONS["REJECT"]]: "Xóa sự kiện thành công",
@@ -39,16 +64,36 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
   const { showModal } = useGlobalModalContext();
   const [opened, { open, close }] = useDisclosure();
   const [openedDetail, { open: openDetail, close: closeDetail }] = useDisclosure();
+  const [openedEdit, { open: openEdit, close: closeEdit }] = useDisclosure();
+  const [openedCreate, { open: openCreate, close: closeCreate }] = useDisclosure();
   const [openToast, setOpenToast] = useState(false);
   const { mutateAsync: updateEvent, isLoading: isUpdatingEvent } = useUpdateEvent();
   const { mutateAsync: deleteEvent, isLoading: isDeletingEvent } = useDeleteEvent();
   const [rowSelected, setRowSelected] = useState<IEventManagement>();
   const [action, setAction] = useState<ActionType>();
 
+  const handleRefreshEvents = () => {
+    // This will be called after successfully creating a new event
+    showModal(MODAL_TYPES.MODAL_SUCCESS, {
+      content: "Tạo sự kiện thành công, danh sách đã được cập nhật",
+    });
+  };
+
   const handleOpenModal = (event: IEventManagement, action?: ActionType) => {
     openDetail();
     setRowSelected(event);
     setAction(action);
+  };
+
+  const handleOpenEditModal = (event: IEventManagement) => {
+    setRowSelected(event);
+    openEdit();
+  };
+
+  const handleEditSuccess = () => {
+    showModal(MODAL_TYPES.MODAL_SUCCESS, {
+      content: "Cập nhật sự kiện thành công",
+    });
   };
 
   const columns = useMemo<MRT_ColumnDef<IEventManagement>[]>(
@@ -64,14 +109,70 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
         header: "Trạng thái",
         size: 200,
         Cell: (props) => <EllipsisCell {...props} />,
+        Edit: ({ cell, row, table }) => {
+          // Lấy label hiện tại
+          const currentLabel = cell.getValue<string>();
+          
+          // Tìm option tương ứng với label
+          const currentOption = StatusEvent.find((option) => option.label === currentLabel);
+          
+          return (
+            <SelectBox
+              value={currentOption?.value || EventStatus.UPCOMING}
+              onChange={(value: string | number) => {
+                // Cập nhật giá trị trong cache
+                row._valuesCache = {
+                  ...row._valuesCache,
+                  status: value as EventStatus,
+                  id: row.original.id,
+                };
+              }}
+              fullWidth
+              options={StatusEvent}
+              placeholder="Chọn trạng thái"
+            />
+          );
+        },
       },
       {
-        accessorFn: (rowData: any) =>
-          new Date(rowData.date).toLocaleDateString("vi"),
+        accessorKey: "date",
         id: "date",
         header: "Ngày tổ chức",
         size: 200,
-        Cell: (props) => <EllipsisCell {...props} />,
+        Cell: ({ cell }) => (
+          <span>{new Date(cell.getValue<string>()).toLocaleDateString("vi")}</span>
+        ),
+        Edit: ({ cell, row, table }) => {
+          // Lấy giá trị ngày hiện tại
+          const currentDate = cell.getValue<string>() 
+            ? new Date(cell.getValue<string>()) 
+            : new Date();
+          
+          return (
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                value={currentDate}
+                onChange={(newDate) => {
+                  if (newDate) {
+                    // Cập nhật giá trị trong cache
+                    row._valuesCache = {
+                      ...row._valuesCache,
+                      date: newDate.toISOString(),
+                      id: row.original.id,
+                    };
+                  }
+                }}
+                slotProps={{
+                  textField: {
+                    variant: 'outlined',
+                    size: 'small',
+                    fullWidth: true,
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          );
+        },
       },
       {
         accessorKey: "location",
@@ -102,15 +203,18 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
     }
   };
 
-   const handleSaveEvent: MRT_TableOptions<IEventManagement>["onEditingRowSave"] =
+  const handleSaveEvent: MRT_TableOptions<IEventManagement>["onEditingRowSave"] =
     async ({ values, table }) => {
       console.log("values", values);
       await updateEvent({
         id: values.id,
         title: values.title,
-        status: values.status,
+        status: values.status as EventStatus, // Đảm bảo kiểu dữ liệu
         date: values.date,
         location: values.location,
+        mapLink: values.mapLink,
+        image: values.image,
+        description: values.description,
       });
       table.setEditingRow(null); // Thoát chế độ chỉnh sửa
     };
@@ -119,6 +223,7 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
     columns,
     data: data || [],
     enableRowActions: true,
+    enableEditing: true,
     onEditingRowSave: handleSaveEvent,
     renderTopToolbar: () => <div />,
     renderBottomToolbar: () => <div />,
@@ -130,11 +235,17 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
           </IconButton>
         </Tooltip>
 
-           <Tooltip title="Chỉnh sửa vị trí">
-                  <IconButton onClick={() => table.setEditingRow(row)}>
-                    <SyncAltIcon />
-                  </IconButton>
-                </Tooltip>
+        <Tooltip title="Chỉnh sửa nhanh">
+          <IconButton onClick={() => table.setEditingRow(row)}>
+            <SyncAltIcon />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Chỉnh sửa đầy đủ">
+          <IconButton onClick={() => handleOpenEditModal(row.original)}>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
 
         <Tooltip title="Xóa sự kiện">
           <IconButton
@@ -151,7 +262,6 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
       </div>
     ),
     positionActionsColumn: "last",
-    
   });
 
   return (
@@ -160,17 +270,18 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
         Quản lý sự kiện
       </Typography>
 
-       <div className="flex items-center justify-end">
-              <Button
-                variant="contained"
-                sx={{
-                  width: "fit-content",
-                }}
-                color="secondary"
-              >
-                Tạo mới sự kiện
-              </Button>
-            </div>
+      <div className="flex items-center justify-end">
+        <Button
+          variant="contained"
+          sx={{
+            width: "fit-content",
+          }}
+          color="secondary"
+          onClick={openCreate}
+        >
+          Tạo mới sự kiện
+        </Button>
+      </div>
 
       <MaterialReactTable table={table} />
 
@@ -196,6 +307,19 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
           data={rowSelected!}
         />
       )}
+
+      <EventEditModal
+        open={openedEdit}
+        onClose={closeEdit}
+        event={rowSelected || null}
+        onSuccess={handleEditSuccess}
+      />
+
+      <EventCreationForm
+        open={openedCreate}
+        onClose={closeCreate}
+        onSuccess={handleRefreshEvents}
+      />
     </div>
   );
 };

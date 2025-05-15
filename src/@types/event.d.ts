@@ -3,7 +3,8 @@ export interface IEvent {
   title: string;
   date: string;
   location: string;
-  locationLink?: string;
+  mapLink?: string;
+  image?: string;
   description: string;
   status: "UPCOMING" | "ONGOING" | "FINISHED";
 }
