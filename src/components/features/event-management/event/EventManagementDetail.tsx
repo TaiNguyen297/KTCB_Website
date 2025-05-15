@@ -4,7 +4,7 @@ import { IEvent } from "@/@types/event"; // Đảm bảo bạn có type này
 import { format } from "date-fns";
 
 interface Props {
-  data: IEvent;
+  data: IEvent & { _count?: { eventRegistrations: number } };
   open: boolean;
   onClose: () => void;
 }
@@ -50,6 +50,11 @@ export const EventManagementDetail: React.FC<Props> = ({ data, open, onClose }) 
                 </a>
               </div>
             )}
+
+            <div className={classNameCol}>
+              <span className="font-bold">Số người tham gia: </span>
+              {data._count?.eventRegistrations || 0}
+            </div>
           </div>
 
           <div className="lg:col-span-3 col-span-6 gap-4 flex flex-col">

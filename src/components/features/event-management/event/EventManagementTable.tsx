@@ -38,6 +38,9 @@ export interface IEventManagement extends IEvent {
   mapLink: string;
   image: string;
   description: string;
+  _count?: {
+    eventRegistrations: number;
+  };
 }
 
 interface StatusOption {
@@ -67,7 +70,6 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
   const [openedEdit, { open: openEdit, close: closeEdit }] = useDisclosure();
   const [openedCreate, { open: openCreate, close: closeCreate }] = useDisclosure();
   const [openToast, setOpenToast] = useState(false);
-  const { mutateAsync: updateEvent, isLoading: isUpdatingEvent } = useUpdateEvent();
   const { mutateAsync: deleteEvent, isLoading: isDeletingEvent } = useDeleteEvent();
   const [rowSelected, setRowSelected] = useState<IEventManagement>();
   const [action, setAction] = useState<ActionType>();
@@ -109,7 +111,7 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
         header: "Trạng thái",
         size: 200,
         Cell: (props) => <EllipsisCell {...props} />,
-        Edit: ({ cell, row, table }) => {
+        Edit: ({ cell, row}) => {
           // Lấy label hiện tại
           const currentLabel = cell.getValue<string>();
           
@@ -142,7 +144,7 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
         Cell: ({ cell }) => (
           <span>{new Date(cell.getValue<string>()).toLocaleDateString("vi")}</span>
         ),
-        Edit: ({ cell, row, table }) => {
+        Edit: ({ cell, row }) => {
           // Lấy giá trị ngày hiện tại
           const currentDate = cell.getValue<string>() 
             ? new Date(cell.getValue<string>()) 
@@ -180,6 +182,13 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
         size: 200,
         Cell: (props) => <EllipsisCell {...props} />,
       },
+      {
+        accessorKey: "_count.eventRegistrations",
+        header: "Số người tham gia",
+        enableEditing: false,
+        size: 150,
+        Cell: ({ row }) => row.original._count?.eventRegistrations || 0,
+      },
     ],
     []
   );
@@ -203,28 +212,12 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
     }
   };
 
-  const handleSaveEvent: MRT_TableOptions<IEventManagement>["onEditingRowSave"] =
-    async ({ values, table }) => {
-      console.log("values", values);
-      await updateEvent({
-        id: values.id,
-        title: values.title,
-        status: values.status as EventStatus, // Đảm bảo kiểu dữ liệu
-        date: values.date,
-        location: values.location,
-        mapLink: values.mapLink,
-        image: values.image,
-        description: values.description,
-      });
-      table.setEditingRow(null); // Thoát chế độ chỉnh sửa
-    };
-
   const table = useTable({
     columns,
     data: data || [],
     enableRowActions: true,
     enableEditing: true,
-    onEditingRowSave: handleSaveEvent,
+    // onEditingRowSave: handleSaveEvent,
     renderTopToolbar: () => <div />,
     renderBottomToolbar: () => <div />,
     renderRowActions: ({ row }) => (
@@ -235,13 +228,7 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
           </IconButton>
         </Tooltip>
 
-        <Tooltip title="Chỉnh sửa nhanh">
-          <IconButton onClick={() => table.setEditingRow(row)}>
-            <SyncAltIcon />
-          </IconButton>
-        </Tooltip>
-
-        <Tooltip title="Chỉnh sửa đầy đủ">
+        <Tooltip title="Chỉnh sửa">
           <IconButton onClick={() => handleOpenEditModal(row.original)}>
             <EditIcon />
           </IconButton>
@@ -266,10 +253,6 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
 
   return (
     <div className="min-h-[520px] flex flex-col gap-4">
-      <Typography fontSize={28} fontWeight="bold">
-        Quản lý sự kiện
-      </Typography>
-
       <div className="flex items-center justify-end">
         <Button
           variant="contained"
@@ -284,14 +267,12 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
       </div>
 
       <MaterialReactTable table={table} />
-
       <ToastSuccess
         open={openToast}
         onClose={() => setOpenToast(false)}
         heading="Thành công"
         content={`${TEXT_TOAST[action as ActionType]}`}
       />
-
       <ModalConfirm
         title={`Thông báo xác nhận`}
         open={opened}

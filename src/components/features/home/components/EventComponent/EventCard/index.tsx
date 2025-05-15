@@ -10,7 +10,6 @@ import {
 import { EventInformation } from "../EventInfomation";
 import ToastSuccess from "@/components/shared/toasts/ToastSuccess";
 import { Box, Card, CardContent, Button, Typography, Chip, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
-import { MODAL_TYPES, useGlobalModalContext } from "@/components/features/global-modal/GlobalModal";
 
 const getStatusLabel = (status: string) => {
   switch (status) {
@@ -56,7 +55,7 @@ const EventCard: React.FC<any> = ({ event }) => {
   const onSubmit = handleSubmit(async (data) => {
     setIsSubmitted(true);
     try {
-      const response = await fetch('/api/volunteer_event', {
+      const response = await fetch('/api/event_management?type=register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

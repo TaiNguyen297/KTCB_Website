@@ -24,7 +24,32 @@ export default async function handler(
   try {
     switch (req.method) {
       case "POST":
-        const data = req.body;
+        const { type } = req.query;
+
+        if(type == "event"){
+          const data = req.body;
+
+        if (!data) {
+          return res.status(400).json({ message: "Content not found" });
+        }
+
+        const event = await prisma.volunteerEvents.create({
+          data: {
+            title: data.title,
+            date: new Date(data.date),
+            status: data.status,
+            location: data.location,
+            mapLink: data.mapLink,
+            image: data.image,
+            description: data.description,
+          }
+        });
+
+        return res.status(201).json(event);
+        }
+
+        if(type == "register"){
+          const data = req.body;
 
         if (!data) {
           return res.status(400).json({ message: "Content not found" });
@@ -54,17 +79,34 @@ export default async function handler(
         });
 
         return res.status(201).json(user);
+        }
 
      case "GET": {
         const { type } = req.query;
 
         if (type === "event") {
-          const events = await prisma.volunteerEvents.findMany();
+          const events = await prisma.volunteerEvents.findMany({
+            include: {
+              _count: {
+                select: {
+                  eventRegistrations: true
+                }
+              }
+            }
+          });
           return res.status(200).json(events);
         }
 
         if (type === "registration") {
-          const registrations = await prisma.eventRegistration.findMany();
+          const registrations = await prisma.eventRegistration.findMany({
+            include: {
+              event: {
+                select: {
+                  title: true,
+                },
+              },
+            },
+          });
           return res.status(200).json(registrations);
         }
 

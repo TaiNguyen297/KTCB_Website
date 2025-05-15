@@ -76,7 +76,7 @@ const Header = () => {
 
         <Stack direction="row" alignItems="center" gap="12px">
           {!!session ? (
-            <AccountMenu userName="Nguyễn Hữu Minh" />
+            <AccountMenu userName={session.user?.name || ""} />
           ) : (
             <Link
               href="/login"
