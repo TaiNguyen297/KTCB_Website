@@ -43,19 +43,26 @@ export default function Login() {
     },
   });
 
+  const [loginError, setLoginError] = React.useState<string>("");
+
   const onSubmit = handleSubmit(async (data) => {
     try {
+      setLoginError("");
       const res = await signIn("credentials", {
         redirect: false,
         email: data.email,
         password: data.password
       });
 
-      console.log(res);
+      if (res?.error) {
+        setLoginError("Email hoặc mật khẩu không đúng.");
+        return;
+      }
       if (!res?.error) {
         router.push('/');
       }
     } catch (error: any) {
+      setLoginError("Đã có lỗi xảy ra. Vui lòng thử lại.");
       console.log(error);
     }
   });
@@ -110,6 +117,9 @@ export default function Login() {
             width: "100%",
           }}
         >
+          {loginError && (
+            <p style={{ color: 'red', margin: 0, textAlign: 'center' }}>{loginError}</p>
+          )}
           <Controller
             name="email"
             control={control}

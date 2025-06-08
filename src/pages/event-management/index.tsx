@@ -18,14 +18,14 @@ import { getPersonInterview } from "@/components/features/recruitment-management
 
 const RecruitmentManagementPage = () => {
   const [open, setOpen] = useState(false);
-  // const { data: session } = useSession({
-  //   required: true,
-  //   onUnauthenticated() {
-  //     router.push("/login");
-  //   },
-  // });
+  const { data: session } = useSession({
+    required: true,
+    onUnauthenticated() {
+      router.push("/login");
+    },
+  });
 
-  // console.log(session);
+  console.log(session);
   
   const router = useRouter();
 
@@ -63,14 +63,14 @@ const RecruitmentManagementPage = () => {
     },
   ];
 
-  // if (!session) {
-  //   return (
-  //     <div>
-  //       {/* TODO: Them icon loading */}
-  //       Đang tải...
-  //     </div>
-  //   );
-  // }
+  if (!session) {
+    return (
+      <div>
+        {/* TODO: Them icon loading */}
+        Đang tải...
+      </div>
+    );
+  }
 
   return (
     <ContainerXL>

@@ -61,7 +61,7 @@
         { "name": "Quản lý đơn tuyển", "path": "/recruitment-management"},
         { "name": "Danh sách thành viên", "path": "/member-list"},
         { "name": "Quản lý thành viên", "path": "/member-management"},
-        { "name": "Quản lý tài chính", "path": "/expense-management"}
+        { "name": "Quản lý sự kiện", "path": "/event-management"}
       ]
     }
   ]

@@ -21,6 +21,8 @@ import MemberPositionKTCB from "@/utils/data/json/position_ktcb.json";
 import TeamKTCB from "@/utils/data/json/team.json";
 
 import { SelectBox } from "@/components/shared/inputs/select/SelectBox";
+import GrantAccountForm from "../GrantAccountForm";
+import Dialog from "@mui/material/Dialog";
 
 export interface IMemberManagement extends IOfficialMember {
   team?: string;
@@ -29,7 +31,6 @@ export interface IMemberManagement extends IOfficialMember {
   teamId?: string;
   id: string;
 }
-
 
 const TEXT_TOAST = {
   [ACTIONS["REJECT"]]: "Xác nhận yêu cầu thành viên rời đội thành công",
@@ -47,9 +48,11 @@ const MemberManagementTable = (props: { data: MemberWithPosition[] }) => {
     useDisclosure();
 
   const [openToast, setOpenToast] = useState(false);
+  const [openGrantAccount, setOpenGrantAccount] = useState(false);
 
   const [rowSelected, setRowSelected] = useState<MemberWithPosition>();
   const [action, setAction] = useState<ActionType>();
+  const [grantAccountMemberId, setGrantAccountMemberId] = useState<number | null>(null);
 
   const { mutateAsync: updateMember, isLoading: isUpdatingMember } =
     useUpdateMember();
@@ -224,6 +227,16 @@ const MemberManagementTable = (props: { data: MemberWithPosition[] }) => {
             <ClearIcon />
           </IconButton>
         </Tooltip>
+        <Tooltip title="Cấp tài khoản">
+          <IconButton
+            onClick={() => {
+              setGrantAccountMemberId(Number(row.original.id));
+              setOpenGrantAccount(true);
+            }}
+          >
+            <span role="img" aria-label="grant-account">🔑</span>
+          </IconButton>
+        </Tooltip>
       </div>
     ),
     positionActionsColumn: "last",
@@ -261,6 +274,18 @@ const MemberManagementTable = (props: { data: MemberWithPosition[] }) => {
           data={rowSelected!}
         />
       )}
+
+      <Dialog open={openGrantAccount} onClose={() => setOpenGrantAccount(false)}>
+        <div style={{ padding: 24, minWidth: 400 }}>
+          <h3 style={{ marginBottom: 16 }}>Cấp tài khoản cho thành viên</h3>
+          {grantAccountMemberId && (
+            <GrantAccountForm
+              memberId={grantAccountMemberId}
+              onSuccess={() => setOpenGrantAccount(false)}
+            />
+          )}
+        </div>
+      </Dialog>
     </div>
   );
 };
