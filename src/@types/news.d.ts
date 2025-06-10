@@ -6,7 +6,7 @@ export interface INews {
   description: string;
   author: string;
   tags: string[];
-  team: string[];
+  team: string;
 
   is_highlight?: boolean;
 }

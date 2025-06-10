@@ -101,12 +101,35 @@ const EventCard: React.FC<any> = ({ event }) => {
         </Typography>
         <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1, color: "text.secondary" }}>
           <Typography variant="body2">
-            {format(new Date(event.date), "dd/MM/yyyy")}
+            Bắt đầu: {format(new Date(event.startDate), "dd/MM/yyyy")}
+          </Typography>
+          <Typography variant="body2" sx={{ ml: 2 }}>
+            Kết thúc: {format(new Date(event.endDate), "dd/MM/yyyy")}
           </Typography>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "text.secondary", mt: 1 }}>
-          <Typography variant="body2">{event.location}</Typography>
+          <Typography variant="body2">Địa điểm: {event.location}</Typography>
+          {event.mapLink && (
+            <a href={event.mapLink} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 8, color: '#1976d2', textDecoration: 'underline', fontSize: 13 }}>
+              Xem bản đồ
+            </a>
+          )}
         </Box>
+        {event.status === "FINISHED" && event.eventResult && (
+          <Box sx={{ mt: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 2 }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>Kết quả sự kiện:</Typography>
+            <Typography variant="body2">Tổng quyên góp: {event.eventResult.totalDonation?.toLocaleString()} VNĐ</Typography>
+            <Typography variant="body2">Tổng người tham gia: {event.eventResult.totalParticipant}</Typography>
+            <Typography variant="body2">Ghi chú: {event.eventResult.summary}</Typography>
+            {event.eventResult.resultImages && event.eventResult.resultImages.length > 0 && (
+              <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {event.eventResult.resultImages.map((img: string, idx: number) => (
+                  <img key={idx} src={img} alt="result" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }} />
+                ))}
+              </Box>
+            )}
+          </Box>
+        )}
         <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
           <Button
             variant="contained"
@@ -115,14 +138,16 @@ const EventCard: React.FC<any> = ({ event }) => {
           >
             Xem thông tin
           </Button>
-          <Button
-            onClick={handleJoin}
-            variant="contained"
-            color="success"
-            sx={{ fontSize: "0.875rem" }}
-          >
-            Tham gia
-          </Button>
+          {(event.status === "UPCOMING" || event.status === "ONGOING") && (
+            <Button
+              onClick={handleJoin}
+              variant="contained"
+              color="success"
+              sx={{ fontSize: "0.875rem" }}
+            >
+              Tham gia
+            </Button>
+          )}
         </Box>
       </CardContent>
 

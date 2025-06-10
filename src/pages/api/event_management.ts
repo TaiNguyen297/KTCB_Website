@@ -9,7 +9,8 @@ export interface DeleteEventDto {
 export interface UpdateEventDto {
   id: number;
   title: string;
-  date: Date;
+  startDate: Date;
+  endDate: Date;
   location: string;
   mapLink: string;
   status: EventStatus;
@@ -36,7 +37,8 @@ export default async function handler(
         const event = await prisma.volunteerEvents.create({
           data: {
             title: data.title,
-            date: new Date(data.date),
+            startDate: new Date(data.startDate),
+            endDate: new Date(data.endDate),
             status: data.status,
             location: data.location,
             mapLink: data.mapLink,
@@ -124,7 +126,8 @@ export default async function handler(
           },
           data: {
             title: data.title,
-            date: new Date(data.date),
+            startDate: new Date(data.startDate),
+            endDate: new Date(data.endDate),
             location: data.location,
             mapLink: data.mapLink,
             status: data.status,

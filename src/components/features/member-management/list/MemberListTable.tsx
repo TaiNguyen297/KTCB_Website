@@ -19,6 +19,7 @@ import {
   useGlobalModalContext,
 } from "../../global-modal/GlobalModal";
 import { SelectBox } from "@/components/shared/inputs";
+import { saveAs } from "file-saver";
 // import { useUpdateMember } from "./hooks/useUpdateMember";
 import { MemberWithPosition } from "@/@types/member";
 
@@ -74,7 +75,24 @@ const MemberListTable = (props: {data: MemberWithPosition[]}) => {
   );
 
   const handleDownloadList = () => {
-    console.log("download");
+    if (!data || data.length === 0) return;
+    const csvRows = [
+      [
+        "Họ và tên",
+        "Ngày sinh",
+        "Email",
+        "Số điện thoại"
+      ],
+      ...data.map((row) => [
+        row.fullName,
+        new Date(row.birthday).toLocaleDateString("vi"),
+        row.email,
+        row.phoneNumber
+      ])
+    ];
+    const csvContent = csvRows.map(e => e.map(v => `"${(v ?? "").toString().replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    saveAs(blob, `danh_sach_thanh_vien_${new Date().toISOString().slice(0,10)}.csv`);
   };
 
   const table = useTable({

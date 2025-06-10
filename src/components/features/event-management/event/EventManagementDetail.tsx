@@ -30,8 +30,12 @@ export const EventManagementDetail: React.FC<Props> = ({ data, open, onClose }) 
               {data.title}
             </div>
             <div className={classNameCol}>
-              <span className="font-bold">Ngày diễn ra: </span>
-              {format(new Date(data.date), "dd/MM/yyyy")}
+              <span className="font-bold">Ngày bắt đầu: </span>
+              {format(new Date(data.startDate), "dd/MM/yyyy")}
+            </div>
+            <div className={classNameCol}>
+              <span className="font-bold">Ngày kết thúc: </span>
+              {format(new Date(data.endDate), "dd/MM/yyyy")}
             </div>
             <div className={classNameCol}>
               <span className="font-bold">Địa điểm: </span>

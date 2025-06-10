@@ -53,7 +53,8 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
   const EventFormState = {
     title: "",
     status: EventStatus.UPCOMING,
-    date: new Date(),
+    startDate: new Date(),
+    endDate: new Date(),
     location: "",
     mapLink: "",
     image: "",
@@ -78,11 +79,20 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
     });
   };
 
-  const handleDateChange = (date: Date | null) => {
+  const handleStartDateChange = (date: Date | null) => {
     if (date) {
       setFormData({
         ...formData,
-        date: date,
+        startDate: date,
+      });
+    }
+  };
+
+  const handleEndDateChange = (date: Date | null) => {
+    if (date) {
+      setFormData({
+        ...formData,
+        endDate: date,
       });
     }
   };
@@ -104,7 +114,8 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
         {
           title: formData.title,
           status: formData.status,
-          date: formData.date,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
           location: formData.location,
           mapLink: formData.mapLink,
           image: formData.image,
@@ -184,15 +195,33 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
             <Grid item xs={12} sm={6}>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
-                  label="Ngày tổ chức"
-                  value={formData.date}
-                  onChange={handleDateChange}
+                  label="Ngày bắt đầu"
+                  value={formData.startDate}
+                  onChange={handleStartDateChange}
                   slotProps={{
                     textField: {
                       variant: 'outlined',
                       fullWidth: true,
                       margin: 'dense',
-                      placeholder: "Chọn ngày tổ chức"
+                      placeholder: "Chọn ngày bắt đầu"
+                    },
+                  }}
+                />
+              </LocalizationProvider>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Ngày kết thúc"
+                  value={formData.endDate}
+                  onChange={handleEndDateChange}
+                  slotProps={{
+                    textField: {
+                      variant: 'outlined',
+                      fullWidth: true,
+                      margin: 'dense',
+                      placeholder: "Chọn ngày kết thúc"
                     },
                   }}
                 />
@@ -278,4 +307,4 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
   );
 };
 
-export { EventCreationForm }; 
+export { EventCreationForm };

@@ -75,7 +75,7 @@ const RecruitmentManagementPage = () => {
   return (
     <ContainerXL>
       <div className="flex flex-col mt-9 gap-4">
-        <DefaultSeo {...SEO} title="Quản lý đơn tuyển" />
+        <DefaultSeo {...SEO} title="Quản lý sự kiện" />
         <ToastSuccess
           open={open}
           onClose={() => setOpen(false)}

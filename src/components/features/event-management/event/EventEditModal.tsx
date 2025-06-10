@@ -56,7 +56,8 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
     id?: number;
     title: string;
     status: EventStatus;
-    date: Date;
+    startDate: Date;
+    endDate: Date;
     location: string;
     mapLink: string;
     image: string;
@@ -66,7 +67,8 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
   const [formData, setFormData] = useState<EventFormData>({
     title: "",
     status: EventStatus.UPCOMING,
-    date: new Date(),
+    startDate: new Date(),
+    endDate: new Date(),
     location: "",
     mapLink: "",
     image: "",
@@ -79,7 +81,8 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
         id: event.id,
         title: event.title,
         status: event.status,
-        date: new Date(event.date),
+        startDate: new Date(event.startDate),
+        endDate: new Date(event.endDate),
         location: event.location,
         mapLink: event.mapLink || "",
         image: event.image || "",
@@ -104,11 +107,20 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
     });
   };
 
-  const handleDateChange = (date: Date | null) => {
+   const handleStartDateChange = (date: Date | null) => {
     if (date) {
       setFormData({
         ...formData,
-        date: date,
+        startDate: date,
+      });
+    }
+  };
+
+  const handleEndDateChange = (date: Date | null) => {
+    if (date) {
+      setFormData({
+        ...formData,
+        endDate: date,
       });
     }
   };
@@ -128,7 +140,8 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
         id: formData.id,
         title: formData.title || "",
         status: formData.status as EventStatus,
-        date: formData.date || new Date(),
+        startDate: formData.startDate|| new Date(),
+        endDate: formData.endDate || new Date(),
         location: formData.location || "",
         mapLink: formData.mapLink || "",
         image: formData.image || "",
@@ -208,9 +221,26 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
             <Grid item xs={12} sm={6}>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <DatePicker
-                  label="Ngày tổ chức"
-                  value={formData.date ? new Date(formData.date) : null}
-                  onChange={handleDateChange}
+                  label="Ngày bắt đầu"
+                  value={formData.startDate ? new Date(formData.startDate) : null}
+                  onChange={handleStartDateChange}
+                  slotProps={{
+                    textField: {
+                      variant: 'outlined',
+                      fullWidth: true,
+                      margin: 'dense'
+                    },
+                  }}
+                />
+              </LocalizationProvider>
+            </Grid>
+
+             <Grid item xs={12} sm={6}>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Ngày kết thúc"
+                  value={formData.endDate ? new Date(formData.endDate) : null}
+                  onChange={handleEndDateChange}
                   slotProps={{
                     textField: {
                       variant: 'outlined',

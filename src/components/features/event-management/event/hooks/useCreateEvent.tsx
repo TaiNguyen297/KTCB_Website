@@ -4,7 +4,8 @@ import { EventStatus } from "@prisma/client";
 interface CreateEventData {
   title: string;
   status: EventStatus;
-  date: Date;
+  startDate: Date;
+  endDate: Date;
   location: string;
   mapLink: string;
   image: string;

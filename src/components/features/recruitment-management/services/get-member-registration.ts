@@ -4,9 +4,14 @@ interface Props {
   status?: MemberRegistrationStatus;
 }
 
+const baseUrl =
+  typeof window === "undefined"
+    ? process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+    : "";
+
 export const getMemberRegistration = async ({ status }: Props) => {
   const registrations = await fetch(
-    `/api/member_registration${status ? `?status=${status}` : ""}`,
+    `${baseUrl}/api/member_registration${status ? `?status=${status}` : ""}`,
     {
       headers: { "Content-Type": "application/json" },
       method: "GET",
@@ -18,7 +23,7 @@ export const getMemberRegistration = async ({ status }: Props) => {
 
 export const getPersonInterview = async ({ status }: Props) => {
   const interview = await fetch(
-    `/api/recruitment_management${status ? `?status=${status}` : ""}`,
+    `${baseUrl}/api/recruitment_management${status ? `?status=${status}` : ""}`,
     {
       headers: { "Content-Type": "application/json" },
       method: "GET",

@@ -2,12 +2,20 @@ import { Prisma } from "@prisma/client";
 export interface IEvent {
   id: number;
   title: string;
-  date: string;
+  startDate: string;
+  endDate: string;
   location: string;
   mapLink?: string;
   image?: string;
   description: string;
   status: "UPCOMING" | "ONGOING" | "FINISHED";
+  eventRegistrations?: any[];
+  eventResult?: {
+    totalDonation?: number;
+    totalParticipant?: number;
+    summary?: string;
+    resultImages?: string[];
+  };
 }
 
 export interface IEventRegistration {

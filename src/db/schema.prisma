@@ -54,16 +54,50 @@ model DonorRegistration {
 }
 
 model VolunteerEvents {
-  id  Int    @id @default(autoincrement())
-  title String
-  status  EventStatus  @default(UPCOMING)
-  date    DateTime
+  id          Int               @id @default(autoincrement())
+  title       String
+  status      EventStatus       @default(UPCOMING)
+  startDate   DateTime          // ✅ Thêm thời gian bắt đầu
+  endDate     DateTime          // ✅ Thêm thời gian kết thúc
   description String
-  location String
-  mapLink String
-  image   String
-  eventRegistrations   EventRegistration[]
-  
+  location    String
+  mapLink     String
+  image       String
+  eventRegistrations EventRegistration[]
+  eventResult EventResult?      // ✅ Liên kết với kết quả sự kiện
+}
+
+model EventResult {
+  id              Int              @id @default(autoincrement())
+  event           VolunteerEvents  @relation(fields: [eventId], references: [id])
+  eventId         Int              @unique
+  totalDonation   Float            // Tổng số tiền/giá trị quyên góp
+  totalParticipant Int             // Tổng số người tham gia
+  summary         String           // Ghi chú kết quả sự kiện
+  resultImages    String[]         // Mảng link ảnh kết quả sự kiện
+}
+
+model DonationEvent {
+  id              Int              @id @default(autoincrement())
+  title           String
+  goalAmount      Float
+  currentAmount   Float            @default(0)
+  description     String
+  startDate       DateTime
+  endDate         DateTime
+  image           String?
+  donations       Donation[]       // Danh sách các lần quyên góp
+}
+
+model Donation {
+  id              Int            @id @default(autoincrement())
+  amount          Float
+  donorName       String
+  donorEmail      String
+  paymentMethod   String         // Ví dụ: "Momo", "ZaloPay", "Chuyển khoản"
+  donationEvent   DonationEvent @relation(fields: [donationEventId], references: [id])
+  donationEventId Int
+  createdAt       DateTime       @default(now())
 }
 
 model EventRegistration {

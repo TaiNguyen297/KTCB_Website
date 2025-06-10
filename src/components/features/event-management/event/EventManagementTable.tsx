@@ -137,29 +137,61 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
         },
       },
       {
-        accessorKey: "date",
-        id: "date",
-        header: "Ngày tổ chức",
+        accessorKey: "startDate",
+        header: "Bắt đầu",
         size: 200,
         Cell: ({ cell }) => (
           <span>{new Date(cell.getValue<string>()).toLocaleDateString("vi")}</span>
         ),
         Edit: ({ cell, row }) => {
-          // Lấy giá trị ngày hiện tại
-          const currentDate = cell.getValue<string>() 
-            ? new Date(cell.getValue<string>()) 
+          const currentDate = cell.getValue<string>()
+            ? new Date(cell.getValue<string>())
             : new Date();
-          
           return (
             <LocalizationProvider dateAdapter={AdapterDateFns}>
               <DatePicker
                 value={currentDate}
                 onChange={(newDate) => {
                   if (newDate) {
-                    // Cập nhật giá trị trong cache
                     row._valuesCache = {
                       ...row._valuesCache,
-                      date: newDate.toISOString(),
+                      startDate: newDate.toISOString(),
+                      id: row.original.id,
+                    };
+                  }
+                }}
+                slotProps={{
+                  textField: {
+                    variant: 'outlined',
+                    size: 'small',
+                    fullWidth: true,
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          );
+        },
+      },
+      {
+        accessorKey: "endDate",
+        header: "Kết thúc",
+        size: 200,
+        Cell: ({ cell }) => (
+          <span>{new Date(cell.getValue<string>()).toLocaleDateString("vi")}</span>
+        ),
+        Edit: ({ cell, row }) => {
+          const currentDate = cell.getValue<string>()
+            ? new Date(cell.getValue<string>())
+            : new Date();
+          return (
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                value={currentDate}
+                onChange={(newDate) => {
+                  if (newDate) {
+                    row._valuesCache = {
+                      ...row._valuesCache,
+                      endDate: newDate.toISOString(),
                       id: row.original.id,
                     };
                   }

@@ -60,7 +60,7 @@ export const getStaticProps: GetStaticProps = async () => {
   try {
     const quote = getQuoteByTeam();
     const events = await prisma.volunteerEvents.findMany({
-      orderBy: { date: "asc" },
+
     });
     if (!quote?.title || !quote?.content || !quote?.banner_url) {
       return {

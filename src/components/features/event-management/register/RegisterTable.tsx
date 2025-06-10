@@ -7,6 +7,8 @@ import { useTable } from "@/libs/hooks/useTable";
 import { IconButton, Tooltip } from "@mui/material";
 import { useDisclosure } from "@/libs/hooks/useDisclosure";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import CheckIcon from "@mui/icons-material/Check";
+import ClearIcon from "@mui/icons-material/Clear";
 import { EllipsisCell } from "@/components/shared/table";
 import { format } from "date-fns";
 import { RegisterDetail } from "./RegisterDetail";
@@ -88,10 +90,20 @@ export const RegisterTable = ({ data }: RegisterTableProps) => {
     enableRowActions: true,
     positionActionsColumn: "last",
     renderRowActions: ({ row }) => (
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center gap-2">
         <Tooltip title="Xem chi tiết">
           <IconButton onClick={() => handleOpenModal(row.original)}>
             <VisibilityIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Duyệt">
+          <IconButton color="success" >
+            <CheckIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Từ chối">
+          <IconButton color="error" >
+            <ClearIcon />
           </IconButton>
         </Tooltip>
       </div>
