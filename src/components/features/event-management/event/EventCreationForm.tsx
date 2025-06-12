@@ -20,6 +20,7 @@ import {
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { EventStatus } from "@prisma/client";
+import { EventType } from "@prisma/client";
 import { useCreateEvent } from "./hooks/useCreateEvent";
 import { MODAL_TYPES, useGlobalModalContext } from "../../global-modal/GlobalModal";
 import { ImageUploader } from "./ImageUploader";
@@ -52,6 +53,7 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
   
   const EventFormState = {
     title: "",
+    type: EventType.VOLUNTEER,
     status: EventStatus.UPCOMING,
     startDate: new Date(),
     endDate: new Date(),
@@ -113,6 +115,7 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
       await createEvent(
         {
           title: formData.title,
+          type: formData.type,
           status: formData.status,
           startDate: formData.startDate,
           endDate: formData.endDate,
@@ -188,6 +191,23 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
                       {option.label}
                     </MenuItem>
                   ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth margin="dense">
+                <InputLabel id="type-label">Loại sự kiện</InputLabel>
+                <Select
+                  labelId="type-label"
+                  name="type"
+                  value={formData.type}
+                  label="Loại sự kiện"
+                  onChange={handleSelectChange}
+                  required
+                >
+                  <MenuItem value="VOLUNTEER">Thiện nguyện</MenuItem>
+                  <MenuItem value="DONATION">Quyên góp</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

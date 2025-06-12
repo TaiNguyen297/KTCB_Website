@@ -9,6 +9,7 @@ export interface DeleteEventDto {
 export interface UpdateEventDto {
   id: number;
   title: string;
+  type: "VOLUNTEER" | "DONATION";
   startDate: Date;
   endDate: Date;
   location: string;
@@ -34,9 +35,10 @@ export default async function handler(
           return res.status(400).json({ message: "Content not found" });
         }
 
-        const event = await prisma.volunteerEvents.create({
+        const event = await prisma.event.create({
           data: {
             title: data.title,
+            type: data.type,
             startDate: new Date(data.startDate),
             endDate: new Date(data.endDate),
             status: data.status,
@@ -87,7 +89,7 @@ export default async function handler(
         const { type } = req.query;
 
         if (type === "event") {
-          const events = await prisma.volunteerEvents.findMany({
+          const events = await prisma.event.findMany({
             include: {
               _count: {
                 select: {
@@ -120,12 +122,13 @@ export default async function handler(
         if (!data) {
           return res.status(400).json({ message: "Content not found" });
         }
-        const event = await prisma.volunteerEvents.update({
+        const event = await prisma.event.update({
           where: {
             id: data.id,
           },
           data: {
             title: data.title,
+            type: data.type,
             startDate: new Date(data.startDate),
             endDate: new Date(data.endDate),
             location: data.location,
@@ -141,7 +144,7 @@ export default async function handler(
       case "PATCH": {
           const deleteData : DeleteEventDto = req.body;  
 
-          const deleteEvent = await prisma.volunteerEvents.delete({
+          const deleteEvent = await prisma.event.delete({
             where: {
               id: deleteData.id,
             },

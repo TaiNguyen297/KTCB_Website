@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { EventStatus } from "@prisma/client";
+import { EventStatus, EventType } from "@prisma/client";
 
 interface CreateEventData {
   title: string;
+  type: EventType
   status: EventStatus;
   startDate: Date;
   endDate: Date;

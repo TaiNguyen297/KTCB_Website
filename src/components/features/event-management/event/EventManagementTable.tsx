@@ -215,6 +215,16 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
         Cell: (props) => <EllipsisCell {...props} />,
       },
       {
+        accessorKey: "type",
+        header: "Loại sự kiện",
+        size: 120,
+        Cell: (props) => (
+          <span>
+            {props.cell.getValue<string>() === "VOLUNTEER" ? "Thiện nguyện" : "Quyên góp"}
+          </span>
+        ),
+      },
+      {
         accessorKey: "_count.eventRegistrations",
         header: "Số người tham gia",
         enableEditing: false,

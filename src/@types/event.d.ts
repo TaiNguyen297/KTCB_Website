@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 export interface IEvent {
   id: number;
   title: string;
+  type: "VOLUNTEER" | "DONATION";
   startDate: string;
   endDate: string;
   location: string;
