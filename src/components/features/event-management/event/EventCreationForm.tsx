@@ -61,6 +61,7 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
     mapLink: "",
     image: "",
     description: "",
+    goalAmount: "",
   };
   
   const [formData, setFormData] = useState(EventFormState);
@@ -123,6 +124,7 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
           mapLink: formData.mapLink,
           image: formData.image,
           description: formData.description,
+          goalAmount: formData.goalAmount ? parseFloat(formData.goalAmount) : undefined,
         }
       );
       
@@ -206,8 +208,8 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
                   onChange={handleSelectChange}
                   required
                 >
-                  <MenuItem value="VOLUNTEER">Thiện nguyện</MenuItem>
-                  <MenuItem value="DONATION">Quyên góp</MenuItem>
+                  <MenuItem value={EventType.VOLUNTEER}>Thiện nguyện</MenuItem>
+                  <MenuItem value={EventType.DONATION}>Quyên góp</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -248,31 +250,36 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
               </LocalizationProvider>
             </Grid>
             
-            <Grid item xs={12} sm={6}>
-              <TextField
-                name="location"
-                label="Địa điểm"
-                fullWidth
-                value={formData.location}
-                onChange={handleChange}
-                variant="outlined"
-                margin="dense"
-                placeholder="Nhập địa điểm tổ chức"
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                name="mapLink"
-                label="Link bản đồ"
-                fullWidth
-                value={formData.mapLink}
-                onChange={handleChange}
-                variant="outlined"
-                margin="dense"
-                placeholder="Nhập đường dẫn Google Maps"
-              />
-            </Grid>
+            {/* Địa điểm và link bản đồ chỉ hiển thị nếu không phải Quyên góp */}
+            {formData.type !== EventType.DONATION && (
+              <>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="location"
+                    label="Địa điểm"
+                    fullWidth
+                    value={formData.location}
+                    onChange={handleChange}
+                    variant="outlined"
+                    margin="dense"
+                    placeholder="Nhập địa điểm tổ chức"
+                  />
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="mapLink"
+                    label="Link bản đồ"
+                    fullWidth
+                    value={formData.mapLink}
+                    onChange={handleChange}
+                    variant="outlined"
+                    margin="dense"
+                    placeholder="Nhập đường dẫn Google Maps"
+                  />
+                </Grid>
+              </>
+            )}
             
             <Grid item xs={12}>
               <Divider sx={{ my: 1 }} />
@@ -299,6 +306,23 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
                 placeholder="Nhập mô tả chi tiết về sự kiện"
               />
             </Grid>
+
+            {/* Nếu là Quyên góp thì render field nhập số tiền mục tiêu */}
+            {formData.type === EventType.DONATION && (
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  name="goalAmount"
+                  label="Mục tiêu quyên góp (VNĐ)"
+                  fullWidth
+                  value={formData.goalAmount}
+                  onChange={handleChange}
+                  variant="outlined"
+                  margin="dense"
+                  placeholder="Nhập số tiền mục tiêu"
+                  type="number"
+                />
+              </Grid>
+            )}
           </Grid>
         </Box>
       </DialogContent>
@@ -317,7 +341,7 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
           onClick={handleSubmit} 
           variant="contained" 
           color="primary"
-          disabled={isLoading || !formData.title || !formData.location}
+          disabled={isLoading || !formData.title}
           startIcon={isLoading ? <CircularProgress size={20} /> : <AddIcon />}
         >
           {isLoading ? "Đang xử lý..." : "Tạo mới"}

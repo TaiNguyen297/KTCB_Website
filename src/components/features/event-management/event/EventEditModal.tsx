@@ -19,7 +19,7 @@ import {
 } from "@mui/material";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { EventStatus } from "@prisma/client";
+import { EventStatus, EventType } from "@prisma/client";
 import { useUpdateEvent } from "./hooks/useUpdateEvent";
 import { MODAL_TYPES, useGlobalModalContext } from "../../global-modal/GlobalModal";
 import { IEventManagement } from "./EventManagementTable";
@@ -55,6 +55,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
   interface EventFormData {
     id?: number;
     title: string;
+    type: EventType;
     status: EventStatus;
     startDate: Date;
     endDate: Date;
@@ -62,11 +63,13 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
     mapLink: string;
     image: string;
     description: string;
+    goalAmount?: number;
   }
   
   const [formData, setFormData] = useState<EventFormData>({
     title: "",
     status: EventStatus.UPCOMING,
+    type: EventType.VOLUNTEER,
     startDate: new Date(),
     endDate: new Date(),
     location: "",
@@ -80,6 +83,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
       setFormData({
         id: event.id,
         title: event.title,
+        type: event.type,
         status: event.status,
         startDate: new Date(event.startDate),
         endDate: new Date(event.endDate),
@@ -87,6 +91,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
         mapLink: event.mapLink || "",
         image: event.image || "",
         description: event.description || "",
+        goalAmount: event.goalAmount ?? undefined,
       });
     }
   }, [event]);
@@ -137,8 +142,9 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
     
     try {
       await updateEvent({
-        id: formData.id,
+        id: formData.id!,
         title: formData.title || "",
+        type: formData.type,
         status: formData.status as EventStatus,
         startDate: formData.startDate|| new Date(),
         endDate: formData.endDate || new Date(),
@@ -146,6 +152,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
         mapLink: formData.mapLink || "",
         image: formData.image || "",
         description: formData.description || "",
+        goalAmount: formData.type === EventType.DONATION ? (formData.goalAmount ? Number(formData.goalAmount) : undefined) : undefined,
       });
       
       showModal(MODAL_TYPES.MODAL_SUCCESS, {
@@ -252,29 +259,49 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
               </LocalizationProvider>
             </Grid>
             
-            <Grid item xs={12} sm={6}>
-              <TextField
-                name="location"
-                label="Địa điểm"
-                fullWidth
-                value={formData.location || ""}
-                onChange={handleChange}
-                variant="outlined"
-                margin="dense"
-              />
-            </Grid>
-            
-            <Grid item xs={12} sm={6}>
-              <TextField
-                name="mapLink"
-                label="Link bản đồ"
-                fullWidth
-                value={formData.mapLink || ""}
-                onChange={handleChange}
-                variant="outlined"
-                margin="dense"
-              />
-            </Grid>
+            {/* Địa điểm và link bản đồ chỉ hiển thị nếu không phải Quyên góp */}
+            {formData.type !== EventType.DONATION && (
+              <>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="location"
+                    label="Địa điểm"
+                    fullWidth
+                    value={formData.location || ""}
+                    onChange={handleChange}
+                    variant="outlined"
+                    margin="dense"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    name="mapLink"
+                    label="Link bản đồ"
+                    fullWidth
+                    value={formData.mapLink || ""}
+                    onChange={handleChange}
+                    variant="outlined"
+                    margin="dense"
+                  />
+                </Grid>
+              </>
+            )}
+            {/* Nếu là Quyên góp thì render field nhập số tiền mục tiêu */}
+            {formData.type === EventType.DONATION && (
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  name="goalAmount"
+                  label="Mục tiêu quyên góp (VNĐ)"
+                  fullWidth
+                  value={formData.goalAmount ?? ""}
+                  onChange={handleChange}
+                  variant="outlined"
+                  margin="dense"
+                  placeholder="Nhập số tiền mục tiêu"
+                  type="number"
+                />
+              </Grid>
+            )}
             
             <Grid item xs={12}>
               <Divider sx={{ my: 1 }} />
@@ -311,7 +338,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
           onClick={handleSubmit} 
           variant="contained" 
           color="primary"
-          disabled={isLoading || !formData.title || !formData.location}
+          disabled={isLoading || !formData.title}
         >
           {isLoading ? "Đang xử lý..." : "Cập nhật"}
         </Button>
@@ -320,4 +347,4 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
   );
 };
 
-export { EventEditModal }; 
+export { EventEditModal };

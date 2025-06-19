@@ -14,6 +14,7 @@ import { RegisterTable } from "@/components/features/event-management/register/R
 import { getEventList } from "@/components/features/event-management/event/service/get-event-list";
 import { getRegisterList } from "@/components/features/event-management/register/service/get-register-list";
 import { getPersonInterview } from "@/components/features/recruitment-management/services/get-member-registration";
+import EventReport from "@/components/features/event-management/event/EventReport";
 
 
 const RecruitmentManagementPage = () => {
@@ -37,7 +38,7 @@ const RecruitmentManagementPage = () => {
 
   // This useQuery could just as well happen in some deeper child to
   // the "Posts"-page, data will be available immediately either way
-  const { data } = useQuery({
+  const { data, refetch } = useQuery({
     queryKey: ["eventList"],
     queryFn: () => getEventList(),
   });
@@ -59,7 +60,10 @@ const RecruitmentManagementPage = () => {
       element: <EventManagementTable data={data} />,
     },
     {
-      element: <RegisterTable data={RegisterData}/>,
+      element: <RegisterTable data={RegisterData}/> ,
+    },
+    {
+      element: <EventReport data={data} onReportAdded={refetch} />,
     },
   ];
 
@@ -107,12 +111,26 @@ const RecruitmentManagementPage = () => {
           >
             Danh sách đăng ký
           </Button>
+          <Button
+            variant="contained"
+            sx={{
+              width: "fit-content",
+              textWrap: "nowrap",
+            }}
+            disabled={watch("tabIndex") === 2}
+            color="secondary"
+            onClick={() => setValue("tabIndex", 2)}
+          >
+            Báo cáo thống kê
+          </Button>
         </div>
 
         <Typography fontSize={28} fontWeight={"bold"}>
           {watch("tabIndex") === 0
             ? "Danh sách sự kiện"
-            : "Danh sách đăng ký sự kiện"}
+            : watch("tabIndex") === 1
+            ? "Danh sách đăng ký sự kiện"
+            : "Tổng hợp báo cáo sự kiện"}
         </Typography>
 
         {tabElement.map((e, index) => {

@@ -9,7 +9,8 @@ import {
 } from "../types";
 import { EventInformation } from "../EventInfomation";
 import ToastSuccess from "@/components/shared/toasts/ToastSuccess";
-import { Box, Card, CardContent, Button, Typography, Chip, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
+import { Box, Card, CardContent, Button, Typography, Chip, Dialog, DialogTitle, DialogContent, DialogActions, Modal } from "@mui/material";
+import { useRouter } from "next/router";
 
 const getStatusLabel = (status: string) => {
   switch (status) {
@@ -27,7 +28,9 @@ const getStatusLabel = (status: string) => {
 const EventCard: React.FC<any> = ({ event }) => {
   const [open, setOpen] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [openSummary, setOpenSummary] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const router = useRouter();
 
   const {
     control,
@@ -115,21 +118,6 @@ const EventCard: React.FC<any> = ({ event }) => {
             </a>
           )}
         </Box>
-        {event.status === "FINISHED" && event.eventResult && (
-          <Box sx={{ mt: 2, p: 2, bgcolor: '#f5f5f5', borderRadius: 2 }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>Kết quả sự kiện:</Typography>
-            <Typography variant="body2">Tổng quyên góp: {event.eventResult.totalDonation?.toLocaleString()} VNĐ</Typography>
-            <Typography variant="body2">Tổng người tham gia: {event.eventResult.totalParticipant}</Typography>
-            <Typography variant="body2">Ghi chú: {event.eventResult.summary}</Typography>
-            {event.eventResult.resultImages && event.eventResult.resultImages.length > 0 && (
-              <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                {event.eventResult.resultImages.map((img: string, idx: number) => (
-                  <img key={idx} src={img} alt="result" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }} />
-                ))}
-              </Box>
-            )}
-          </Box>
-        )}
         <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
           <Button
             variant="contained"
@@ -146,6 +134,16 @@ const EventCard: React.FC<any> = ({ event }) => {
               sx={{ fontSize: "0.875rem" }}
             >
               Tham gia
+            </Button>
+          )}
+          {event.status === "FINISHED" && (
+            <Button
+              variant="outlined"
+              color="info"
+              sx={{ fontSize: "0.875rem" }}
+              onClick={() => router.push(`/event-report/${event.id}`)}
+            >
+              Xem báo cáo
             </Button>
           )}
         </Box>

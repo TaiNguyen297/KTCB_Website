@@ -11,6 +11,7 @@ interface CreateEventData {
   mapLink: string;
   image: string;
   description: string;
+  goalAmount?: number; 
 }
 
 export const useCreateEvent = () => {

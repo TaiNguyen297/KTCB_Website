@@ -8,10 +8,20 @@ import "swiper/css/autoplay";
 import { Pagination, Autoplay, Navigation } from "swiper/modules";
 import ktcbBackground from "../../../../../../public/posts-background.jpg";
 
-const DonationComponent = ({ events }) => {
+interface Event {
+  id: string | number;
+  type: string;
+  // Add other properties of event as needed
+}
+
+interface DonationComponentProps {
+  events: Event[];
+}
+
+const DonationComponent = ({ events }: DonationComponentProps) => {
 
   // Lọc chỉ lấy các event gây quỹ (DONATION)
-  const donationCampaigns = events.filter((event) => event.type === "DONATION");
+  const donationCampaigns = events.filter((event: any) => event.type === "DONATION");
 
   return (
     <Container
@@ -48,7 +58,7 @@ const DonationComponent = ({ events }) => {
         }}
       >
         <Grid container spacing={2}>
-          {donationCampaigns.map((event, index) => (
+          {donationCampaigns.map((event: any, index: any) => (
             <Grid item xs={12} md={6} lg={4} key={event.id}>
               <DonationCard event={event} />
             </Grid>

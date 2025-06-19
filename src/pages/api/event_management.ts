@@ -17,6 +17,7 @@ export interface UpdateEventDto {
   status: EventStatus;
   image: string;
   description: string;
+  goalAmount?: number; 
 }
 
 export default async function handler(
@@ -46,6 +47,7 @@ export default async function handler(
             mapLink: data.mapLink,
             image: data.image,
             description: data.description,
+            goalAmount: data.goalAmount,
           }
         });
 
@@ -85,12 +87,45 @@ export default async function handler(
         return res.status(201).json(user);
         }
 
+        if(type == "eventResult") {
+          const data = req.body;
+          if (!data || !data.eventId) {
+            return res.status(400).json({ message: "Thiếu eventId hoặc dữ liệu không hợp lệ" });
+          }
+          const eventResult = await prisma.eventResult.create({
+            data: {
+              event: { connect: { id: Number(data.eventId) } },
+              totalDonation: data.totalDonation,
+              totalParticipant: data.totalParticipant,
+              summary: data.summary,
+              totalHour: data.totalHours,
+              resultImages: Array.isArray(data.resultImages) ? data.resultImages : [],
+              achievements: Array.isArray(data.achievements) ? data.achievements : [],
+            },
+          });
+          return res.status(201).json(eventResult);
+        }
+
      case "GET": {
-        const { type } = req.query;
+        const { type, id } = req.query;
+
+        if (type === "event" && id) {
+          // Lấy chi tiết 1 event kèm báo cáo
+          const event = await prisma.event.findUnique({
+            where: { id: Number(id) },
+            include: {
+              eventRegistrations: true,
+              eventResult: true,
+            },
+          });
+          if (!event) return res.status(404).json({ message: "Không tìm thấy sự kiện" });
+          return res.status(200).json(event);
+        }
 
         if (type === "event") {
           const events = await prisma.event.findMany({
             include: {
+              eventResult: true,
               _count: {
                 select: {
                   eventRegistrations: true
@@ -118,27 +153,49 @@ export default async function handler(
       }
 
       case "PUT": {
-        const data: UpdateEventDto = req.body;
-        if (!data) {
-          return res.status(400).json({ message: "Content not found" });
+        const { type } = req.query;
+        if (type === "eventResult") {
+          const updateData = req.body;
+          if (!updateData || !updateData.id) {
+            return res.status(400).json({ message: "Thiếu id hoặc dữ liệu không hợp lệ" });
+          }
+          const updated = await prisma.eventResult.update({
+            where: { id: Number(updateData.id) },
+            data: {
+              totalDonation: updateData.totalDonation,
+              totalParticipant: updateData.totalParticipant,
+              totalHour: updateData.totalHours,
+              summary: updateData.summary,
+              resultImages: Array.isArray(updateData.resultImages) ? updateData.resultImages : [],
+              achievements: Array.isArray(updateData.achievements) ? updateData.achievements : [],
+            },
+          });
+          return res.status(200).json(updated);
         }
-        const event = await prisma.event.update({
-          where: {
-            id: data.id,
-          },
-          data: {
-            title: data.title,
-            type: data.type,
-            startDate: new Date(data.startDate),
-            endDate: new Date(data.endDate),
-            location: data.location,
-            mapLink: data.mapLink,
-            status: data.status,
-            image: data.image,
-            description: data.description,
-          },
-        });
-        return res.status(201).json(event);
+        if (type === "event") {
+          const data: UpdateEventDto = req.body;
+          if (!data) {
+            return res.status(400).json({ message: "Content not found" });
+          }
+          const event = await prisma.event.update({
+            where: {
+              id: data.id,
+            },
+            data: {
+              title: data.title,
+              type: data.type,
+              startDate: new Date(data.startDate),
+              endDate: new Date(data.endDate),
+              location: data.location,
+              mapLink: data.mapLink,
+              status: data.status,
+              image: data.image,
+              description: data.description,
+              goalAmount: data.goalAmount,
+            },
+          });
+          return res.status(201).json(event);
+        }
       }
 
       case "PATCH": {

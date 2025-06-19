@@ -17,6 +17,7 @@ export interface IEvent {
     summary?: string;
     resultImages?: string[];
   };
+  goalAmount?: number;
 }
 
 export interface IEventRegistration {

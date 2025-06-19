@@ -80,7 +80,9 @@ model EventResult {
   totalDonation    Float
   totalParticipant Int
   summary          String
+  totalHour        Float
   resultImages     String[]
+  achievements     String[]
 }
 
 model Donation {

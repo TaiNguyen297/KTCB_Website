@@ -64,6 +64,10 @@ const TEXT_CONFIRM = {
 
 const EventManagementTable = (props: { data: IEventManagement[] }) => {
   const { data } = props;
+  // Tách riêng 2 loại sự kiện
+  const volunteerEvents = (data || []).filter(e => e.type === "VOLUNTEER");
+  const donationEvents = (data || []).filter(e => e.type === "DONATION");
+
   const { showModal } = useGlobalModalContext();
   const [opened, { open, close }] = useDisclosure();
   const [openedDetail, { open: openDetail, close: closeDetail }] = useDisclosure();
@@ -98,139 +102,30 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
     });
   };
 
-  const columns = useMemo<MRT_ColumnDef<IEventManagement>[]>(
+  // Tách columns cho từng loại sự kiện
+  const volunteerColumns = useMemo<MRT_ColumnDef<IEventManagement>[]>
+  (
     () => [
-      {
-        accessorKey: "title",
-        header: "Tên sự kiện",
-        size: 200,
-        Cell: (props) => <EllipsisCell {...props} />,
-      },
-      {
-        accessorKey: "status",
-        header: "Trạng thái",
-        size: 200,
-        Cell: (props) => <EllipsisCell {...props} />,
-        Edit: ({ cell, row}) => {
-          // Lấy label hiện tại
-          const currentLabel = cell.getValue<string>();
-          
-          // Tìm option tương ứng với label
-          const currentOption = StatusEvent.find((option) => option.label === currentLabel);
-          
-          return (
-            <SelectBox
-              value={currentOption?.value || EventStatus.UPCOMING}
-              onChange={(value: string | number) => {
-                // Cập nhật giá trị trong cache
-                row._valuesCache = {
-                  ...row._valuesCache,
-                  status: value as EventStatus,
-                  id: row.original.id,
-                };
-              }}
-              fullWidth
-              options={StatusEvent}
-              placeholder="Chọn trạng thái"
-            />
-          );
-        },
-      },
-      {
-        accessorKey: "startDate",
-        header: "Bắt đầu",
-        size: 200,
-        Cell: ({ cell }) => (
-          <span>{new Date(cell.getValue<string>()).toLocaleDateString("vi")}</span>
-        ),
-        Edit: ({ cell, row }) => {
-          const currentDate = cell.getValue<string>()
-            ? new Date(cell.getValue<string>())
-            : new Date();
-          return (
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                value={currentDate}
-                onChange={(newDate) => {
-                  if (newDate) {
-                    row._valuesCache = {
-                      ...row._valuesCache,
-                      startDate: newDate.toISOString(),
-                      id: row.original.id,
-                    };
-                  }
-                }}
-                slotProps={{
-                  textField: {
-                    variant: 'outlined',
-                    size: 'small',
-                    fullWidth: true,
-                  },
-                }}
-              />
-            </LocalizationProvider>
-          );
-        },
-      },
-      {
-        accessorKey: "endDate",
-        header: "Kết thúc",
-        size: 200,
-        Cell: ({ cell }) => (
-          <span>{new Date(cell.getValue<string>()).toLocaleDateString("vi")}</span>
-        ),
-        Edit: ({ cell, row }) => {
-          const currentDate = cell.getValue<string>()
-            ? new Date(cell.getValue<string>())
-            : new Date();
-          return (
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DatePicker
-                value={currentDate}
-                onChange={(newDate) => {
-                  if (newDate) {
-                    row._valuesCache = {
-                      ...row._valuesCache,
-                      endDate: newDate.toISOString(),
-                      id: row.original.id,
-                    };
-                  }
-                }}
-                slotProps={{
-                  textField: {
-                    variant: 'outlined',
-                    size: 'small',
-                    fullWidth: true,
-                  },
-                }}
-              />
-            </LocalizationProvider>
-          );
-        },
-      },
-      {
-        accessorKey: "location",
-        header: "Địa điểm",
-        size: 200,
-        Cell: (props) => <EllipsisCell {...props} />,
-      },
-      {
-        accessorKey: "type",
-        header: "Loại sự kiện",
-        size: 120,
-        Cell: (props) => (
-          <span>
-            {props.cell.getValue<string>() === "VOLUNTEER" ? "Thiện nguyện" : "Quyên góp"}
-          </span>
-        ),
-      },
-      {
-        accessorKey: "_count.eventRegistrations",
-        header: "Số người tham gia",
-        enableEditing: false,
-        size: 150,
-        Cell: ({ row }) => row.original._count?.eventRegistrations || 0,
-      },
+      { accessorKey: "title", header: "Tên sự kiện", size: 200, Cell: (props) => <EllipsisCell {...props} /> },
+      { accessorKey: "status", header: "Trạng thái", size: 120, Cell: (props) => <EllipsisCell {...props} /> },
+      { accessorKey: "startDate", header: "Bắt đầu", size: 120, Cell: ({ cell }) => cell.getValue() ? new Date(cell.getValue<string>()).toLocaleDateString("vi") : "" },
+      { accessorKey: "endDate", header: "Kết thúc", size: 120, Cell: ({ cell }) => cell.getValue() ? new Date(cell.getValue<string>()).toLocaleDateString("vi") : "" },
+      { accessorKey: "location", header: "Địa điểm", size: 200, Cell: (props) => <EllipsisCell {...props} /> },
+      { accessorKey: "_count.eventRegistrations", header: "Số người tham gia", enableEditing: false, size: 150, Cell: ({ row }) => row.original._count?.eventRegistrations || 0 },
+    ],
+    []
+  );
+
+  const donationColumns = useMemo<MRT_ColumnDef<IEventManagement>[]>
+  (
+    () => [
+      { accessorKey: "title", header: "Tên chiến dịch", size: 200, Cell: (props) => <EllipsisCell {...props} /> },
+      { accessorKey: "status", header: "Trạng thái", size: 120, Cell: (props) => <EllipsisCell {...props} /> },
+      { accessorKey: "startDate", header: "Bắt đầu", size: 120, Cell: ({ cell }) => cell.getValue() ? new Date(cell.getValue<string>()).toLocaleDateString("vi") : "" },
+      { accessorKey: "endDate", header: "Kết thúc", size: 120, Cell: ({ cell }) => cell.getValue() ? new Date(cell.getValue<string>()).toLocaleDateString("vi") : "" },
+      { accessorKey: "location", header: "Địa điểm", size: 200, Cell: (props) => <EllipsisCell {...props} /> },
+      { accessorKey: "goalAmount", header: "Mục tiêu (VNĐ)", size: 150, Cell: ({ cell }) => cell.getValue() ? Number(cell.getValue()).toLocaleString("vi-VN") : "" },
+      { accessorKey: "currentAmount", header: "Đã quyên góp (VNĐ)", size: 150, Cell: ({ cell }) => cell.getValue() ? Number(cell.getValue()).toLocaleString("vi-VN") : "" },
     ],
     []
   );
@@ -254,14 +149,11 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
     }
   };
 
-  const table = useTable({
-    columns,
-    data: data || [],
+  const volunteerTable = useTable({
+    columns: volunteerColumns,
+    data: volunteerEvents,
     enableRowActions: true,
     enableEditing: true,
-    // onEditingRowSave: handleSaveEvent,
-    renderTopToolbar: () => <div />,
-    renderBottomToolbar: () => <div />,
     renderRowActions: ({ row }) => (
       <div className="flex items-center justify-center">
         <Tooltip title="Xem chi tiết">
@@ -269,13 +161,45 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
             <VisibilityIcon />
           </IconButton>
         </Tooltip>
-
         <Tooltip title="Chỉnh sửa">
           <IconButton onClick={() => handleOpenEditModal(row.original)}>
             <EditIcon />
           </IconButton>
         </Tooltip>
+        <Tooltip title="Xóa sự kiện">
+          <IconButton
+            onClick={() => {
+              showModal(MODAL_TYPES.MODAL_CONFIRM, {
+                content: TEXT_CONFIRM[ACTIONS["REJECT"]],
+                onConfirm: () => handleDeleteEvent(row),
+              });
+            }}
+          >
+            <ClearIcon />
+          </IconButton>
+        </Tooltip>
+      </div>
+    ),
+    positionActionsColumn: "last",
+  });
 
+  const donationTable = useTable({
+    columns: donationColumns,
+    data: donationEvents,
+    enableRowActions: true,
+    enableEditing: true,
+    renderRowActions: ({ row }) => (
+      <div className="flex items-center justify-center">
+        <Tooltip title="Xem chi tiết">
+          <IconButton onClick={() => handleOpenModal(row.original)}>
+            <VisibilityIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Chỉnh sửa">
+          <IconButton onClick={() => handleOpenEditModal(row.original)}>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
         <Tooltip title="Xóa sự kiện">
           <IconButton
             onClick={() => {
@@ -295,20 +219,15 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
 
   return (
     <div className="min-h-[520px] flex flex-col gap-4">
-      <div className="flex items-center justify-end">
-        <Button
-          variant="contained"
-          sx={{
-            width: "fit-content",
-          }}
-          color="secondary"
-          onClick={openCreate}
-        >
-          Tạo mới sự kiện
+      <div className="flex items-center justify-between mb-2">
+        <Typography variant="h5" fontWeight="bold">Sự kiện tình nguyện</Typography>
+        <Button variant="contained" color="primary" onClick={openCreate}>
+          + Tạo mới sự kiện
         </Button>
       </div>
-
-      <MaterialReactTable table={table} />
+      <MaterialReactTable table={volunteerTable} />
+      <Typography variant="h5" fontWeight="bold" sx={{ mt: 4, mb: 2 }}>Chiến dịch gây quỹ</Typography>
+      <MaterialReactTable table={donationTable} />
       <ToastSuccess
         open={openToast}
         onClose={() => setOpenToast(false)}
