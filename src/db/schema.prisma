@@ -71,6 +71,8 @@ model Event {
   eventRegistrations EventRegistration[]
   eventResult       EventResult?
   donations         Donation[]       // Chỉ dùng cho DONATION
+  postId            Int?             @unique            // Liên kết với bài viết chi tiết
+  post              Post?            @relation(fields: [postId], references: [id])
 }
 
 model EventResult {
@@ -106,6 +108,19 @@ model EventRegistration {
   workPlace String
   event     Event  @relation(fields: [eventId], references: [id])
   eventId   Int
+}
+
+model Post {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  content     String   // Nội dung HTML hoặc markdown
+  summary     String?  // Mô tả ngắn
+  image       String?  // Ảnh đại diện (banner_url)
+  author      String?  // Tên tác giả
+  published   Boolean  @default(false)
+  isHighlight Boolean  @default(false)
+  event       Event?
 }
 
 model Position {

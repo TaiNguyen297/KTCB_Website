@@ -10,7 +10,7 @@ export const useCreateEventRegistration = () => {
   return useMutation({
     mutationKey: ["createDonorRegistration"],
     mutationFn: async (data: EventInputType) => {
-      const response = await fetch(`${baseUrl}/api/volunteer_event`, {
+      const response = await fetch(`${baseUrl}/api/event?type=register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

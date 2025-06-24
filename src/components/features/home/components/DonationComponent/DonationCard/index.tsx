@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { format } from "date-fns";
 import {
@@ -10,6 +10,7 @@ import {
   Box,
   LinearProgress,
 } from "@mui/material";
+import DonationForm from "../DonationForm";
 
 type Props = {
   event: {
@@ -31,6 +32,7 @@ type Props = {
 const formatDate = (date: string) => new Date(date).toLocaleDateString("vi-VN");
 
 const DonationCard: React.FC<Props> = ({ event }) => {
+  const [openForm, setOpenForm] = useState(false);
   const progress =
     event.goalAmount && event.currentAmount
       ? Math.min(100, Math.round((event.currentAmount / event.goalAmount) * 100))
@@ -87,10 +89,24 @@ const DonationCard: React.FC<Props> = ({ event }) => {
             fullWidth
             color="primary"
             sx={{ mt: 1, borderRadius: 2 }}
+            onClick={() => {
+              if (event.status === "ONGOING" && event.type === "DONATION") setOpenForm(true);
+              // Có thể điều hướng hoặc xử lý khác cho các loại event khác
+            }}
           >
             {event.status === "ONGOING" ? (event.type === "DONATION" ? "Quyên góp ngay" : "Tham gia ngay") : "Xem chi tiết"}
           </Button>
         </Box>
+        <DonationForm
+          open={openForm}
+          onClose={() => setOpenForm(false)}
+          eventTitle={event.title}
+          onSubmit={(values) => {
+            // TODO: Gọi API quyên góp ở đây, truyền eventId, values
+            // Ví dụ: donateToEvent({ ...values, eventId: event.id })
+            setOpenForm(false);
+          }}
+        />
       </CardContent>
     </Card>
   );

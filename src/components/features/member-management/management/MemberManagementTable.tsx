@@ -19,9 +19,11 @@ import { useUpdateMember } from "../list/hooks/useUpdateMember";
 import { useDeleteMember } from "../list/hooks/useDeleteMember";
 import MemberPositionKTCB from "@/utils/data/json/position_ktcb.json";
 import TeamKTCB from "@/utils/data/json/team.json";
+import SecurityIcon from '@mui/icons-material/Security';
 
 import { SelectBox } from "@/components/shared/inputs/select/SelectBox";
 import GrantAccountForm from "../GrantAccountForm";
+import RolePermissionForm from "../RolePermissionForm";
 import Dialog from "@mui/material/Dialog";
 
 export interface IMemberManagement extends IOfficialMember {
@@ -49,10 +51,12 @@ const MemberManagementTable = (props: { data: MemberWithPosition[] }) => {
 
   const [openToast, setOpenToast] = useState(false);
   const [openGrantAccount, setOpenGrantAccount] = useState(false);
+  const [openRolePermission, setOpenRolePermission] = useState(false);
 
   const [rowSelected, setRowSelected] = useState<MemberWithPosition>();
   const [action, setAction] = useState<ActionType>();
   const [grantAccountMemberId, setGrantAccountMemberId] = useState<number | null>(null);
+  const [rolePermissionUserId, setRolePermissionUserId] = useState<number | null>(null);
 
   const { mutateAsync: updateMember, isLoading: isUpdatingMember } =
     useUpdateMember();
@@ -237,6 +241,31 @@ const MemberManagementTable = (props: { data: MemberWithPosition[] }) => {
             <span role="img" aria-label="grant-account">🔑</span>
           </IconButton>
         </Tooltip>
+        <Tooltip title="Phân quyền">
+          <IconButton
+            onClick={() => {
+              // Get User ID associated with this member
+              const memberId = Number(row.original.id);
+              // Giả sử có API lấy user từ memberId
+              fetch(`/api/member_management/get_user?memberId=${memberId}`)
+                .then(res => res.json())
+                .then(data => {
+                  if (data.userId) {
+                    setRolePermissionUserId(data.userId);
+                    setOpenRolePermission(true);
+                  } else {
+                    alert('Thành viên này chưa có tài khoản. Vui lòng cấp tài khoản trước.');
+                  }
+                })
+                .catch(err => {
+                  console.error('Lỗi khi lấy thông tin User:', err);
+                  alert('Không thể lấy thông tin người dùng. Vui lòng thử lại sau.');
+                });
+            }}
+          >
+            <SecurityIcon />
+          </IconButton>
+        </Tooltip>
       </div>
     ),
     positionActionsColumn: "last",
@@ -282,6 +311,18 @@ const MemberManagementTable = (props: { data: MemberWithPosition[] }) => {
             <GrantAccountForm
               memberId={grantAccountMemberId}
               onSuccess={() => setOpenGrantAccount(false)}
+            />
+          )}
+        </div>
+      </Dialog>
+
+      <Dialog open={openRolePermission} onClose={() => setOpenRolePermission(false)}>
+        <div style={{ padding: 24, minWidth: 500 }}>
+          <h3 style={{ marginBottom: 16 }}>Phân quyền người dùng</h3>
+          {rolePermissionUserId && (
+            <RolePermissionForm
+              userId={rolePermissionUserId}
+              onSuccess={() => setOpenRolePermission(false)}
             />
           )}
         </div>

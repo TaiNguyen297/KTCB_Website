@@ -1,164 +1,107 @@
-import { INews } from "@/@types/news";
-import { ContainerXL } from "@/components/layouts/ContainerXL";
-import { SEO } from "@/configs/seo.config";
-import { useSession } from "next-auth/react";
-import { NextPage } from "next";
-import { DefaultSeo } from "next-seo";
 import { useState } from "react";
-import { Box, Button, Typography } from "@mui/material";
-import { QueryClient, dehydrate, useQuery } from "@tanstack/react-query";
-import ToastSuccess from "@/components/shared/toasts/ToastSuccess";
-import AddIcon from "@mui/icons-material/Add";
-import { NewsManagementTable } from "@/components/features/news-management/news/NewsManagementTable";
-import { NewsFormModal } from "@/components/features/news-management/news/NewsFormModal";
-import { getNewsList, createNews, updateNews, deleteNews } from "@/components/features/news-management/news/service/news-service";
+import { Box, Button, Typography, Dialog, DialogContent } from "@mui/material";
+import { useQuery } from "@tanstack/react-query";
+import { MaterialReactTable, MRT_ColumnDef } from "material-react-table";
+import { useTable } from "@/libs/hooks/useTable";
+import PostForm from "@/components/features/news/PostForm";
+import { getPostList, addPost, updatePost, deletePost } from "@/components/features/news/service/post-service";
 
-const NewsManagementPage: NextPage = () => {
-  const { data: session } = useSession();
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingNews, setEditingNews] = useState<INews | null>(null);
-  const [successToast, setSuccessToast] = useState({
-    open: false,
-    message: "",
+export default function NewsManagementPage() {
+  const { data = [], refetch } = useQuery({
+    queryKey: ["postList"],
+    queryFn: getPostList,
   });
+  const [openForm, setOpenForm] = useState(false);
+  const [rowSelected, setRowSelected] = useState<any>(null);
 
-  // Query to get news data
-  const { data: newsData = [], refetch } = useQuery({
-    queryKey: ["newsList"],
-    queryFn: getNewsList,
+  const columns: MRT_ColumnDef<any>[] = [
+    { accessorKey: "title", header: "Tiêu đề", size: 200 },
+    { accessorKey: "slug", header: "Slug", size: 150 },
+    { accessorKey: "summary", header: "Mô tả ngắn", size: 250 },
+    { accessorKey: "author", header: "Tác giả", size: 120 },
+    {
+      accessorKey: "published",
+      header: "Trạng thái",
+      size: 100,
+      Cell: ({ cell }) =>
+        cell.getValue() ? "Đã đăng" : "Nháp",
+    },
+  ];
+
+  const table = useTable({
+    columns,
+    data,
+    enableRowActions: true,
+    positionActionsColumn: "last",
+    renderRowActions: ({ row }) => (
+      <div className="flex items-center gap-2">
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={() => {
+            setRowSelected(row.original);
+            setOpenForm(true);
+          }}
+        >
+          Sửa
+        </Button>
+        <Button
+          size="small"
+          color="error"
+          variant="outlined"
+          onClick={async () => {
+            if (window.confirm("Bạn có chắc chắn muốn xóa bài viết này?")) {
+              await deletePost(row.original.id);
+              refetch();
+            }
+          }}
+        >
+          Xóa
+        </Button>
+      </div>
+    ),
   });
-
-  // Handle form submission (create or update)
-  const handleSubmit = async (formData: any) => {
-    try {
-      if (editingNews) {
-        // Update existing news
-        await updateNews({
-          slug: editingNews.slug,
-          title: formData.title,
-          description: formData.description,
-          banner_url: formData.banner_url,
-          author: formData.author,
-          tags: formData.tags,
-          team: formData.team,
-          is_highlight: formData.is_highlight,
-        });
-        setSuccessToast({
-          open: true,
-          message: "Cập nhật bài viết thành công",
-        });
-      } else {
-        // Create new news
-        await createNews({
-          title: formData.title,
-          description: formData.description,
-          banner_url: formData.banner_url,
-          author: formData.author,
-          tags: formData.tags,
-          team: formData.team,
-          is_highlight: formData.is_highlight,
-        });
-        setSuccessToast({
-          open: true,
-          message: "Thêm bài viết mới thành công",
-        });
-      }
-
-      // Close the form and refresh data
-      setIsFormOpen(false);
-      setEditingNews(null);
-      refetch();
-    } catch (error) {
-      console.error("Error submitting news:", error);
-      // Handle error
-    }
-  };
-
-  // Handle delete news
-  const handleDelete = async (slug: string) => {
-    try {
-      await deleteNews(slug);
-      setSuccessToast({
-        open: true,
-        message: "Xóa bài viết thành công",
-      });
-      refetch();
-    } catch (error) {
-      console.error("Error deleting news:", error);
-    }
-  };
-
-  // Handle edit news
-  const handleEdit = (news: INews) => {
-    setEditingNews(news);
-    setIsFormOpen(true);
-  };
 
   return (
-    <ContainerXL>
-      <div className="flex flex-col mt-9 gap-4">
-        <DefaultSeo {...SEO} title="Quản lý bài viết" />
-        
-        <ToastSuccess
-          open={successToast.open}
-          onClose={() => setSuccessToast({ open: false, message: "" })}
-          heading="Thành công"
-          content={successToast.message}
-        />
-
-        <div className="flex justify-between items-center">
-          <Typography fontSize={28} fontWeight={"bold"}>
-            Quản lý bài viết
-          </Typography>
-          
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => {
-              setEditingNews(null);
-              setIsFormOpen(true);
-            }}
-            sx={{ minWidth: "180px" }}
-          >
-            Thêm bài viết
-          </Button>
-        </div>
-
-        <Box>
-          <NewsManagementTable 
-            data={newsData} 
-            onDelete={handleDelete}
-            onEdit={handleEdit}
-          />
-        </Box>
-
-        <NewsFormModal
-          isOpen={isFormOpen}
-          onClose={() => {
-            setIsFormOpen(false);
-            setEditingNews(null);
+    <Box maxWidth={1200} mx="auto" py={2}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="h5" fontWeight="bold">
+          Quản lý bài viết
+        </Typography>
+        <Button
+          variant="contained"
+          onClick={() => {
+            setRowSelected(null);
+            setOpenForm(true);
           }}
-          onSubmit={handleSubmit}
-          editingNews={editingNews}
-        />
-      </div>
-    </ContainerXL>
+        >
+          Thêm bài viết
+        </Button>
+      </Box>
+      <MaterialReactTable table={table} />
+      <Dialog
+        open={openForm}
+        onClose={() => setOpenForm(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogContent sx={{ p: 0 }}>
+          <PostForm
+            open={true}
+            initialValues={rowSelected}
+            onSuccess={async (values) => {
+              if (values.id) {
+                await updatePost(values);
+              } else {
+                await addPost(values);
+              }
+              setOpenForm(false);
+              refetch();
+            }}
+            onCancel={() => setOpenForm(false)}
+          />
+        </DialogContent>
+      </Dialog>
+    </Box>
   );
-};
-
-export default NewsManagementPage;
-
-export async function getServerSideProps() {
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery({
-    queryKey: ["newsList"],
-    queryFn: getNewsList,
-  });
-
-  return {
-    props: {
-      dehydratedState: dehydrate(queryClient),
-    },
-  };
 }

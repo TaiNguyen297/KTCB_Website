@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Dialog,
@@ -65,6 +65,14 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
   };
   
   const [formData, setFormData] = useState(EventFormState);
+  const [postOptions, setPostOptions] = useState<{id: number, title: string}[]>([]);
+  const [postId, setPostId] = useState<number | null>(null);
+
+  useEffect(() => {
+    fetch("/api/news_management?type=list")
+      .then(res => res.json())
+      .then(data => setPostOptions(data.map((p: any) => ({ id: p.id, title: p.title }))));
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
     const { name, value } = e.target;
@@ -113,26 +121,26 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
 
   const handleSubmit = async () => {
     try {
-      await createEvent(
-        {
-          title: formData.title,
-          type: formData.type,
-          status: formData.status,
-          startDate: formData.startDate,
-          endDate: formData.endDate,
-          location: formData.location,
-          mapLink: formData.mapLink,
-          image: formData.image,
-          description: formData.description,
-          goalAmount: formData.goalAmount ? parseFloat(formData.goalAmount) : undefined,
-        }
-      );
+      await createEvent({
+        title: formData.title,
+        type: formData.type,
+        status: formData.status,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        location: formData.location,
+        mapLink: formData.mapLink,
+        image: formData.image,
+        description: formData.description,
+        goalAmount: formData.goalAmount ? parseFloat(formData.goalAmount) : undefined,
+        postId: postId ?? undefined,
+      });
       
       showModal(MODAL_TYPES.MODAL_SUCCESS, {
         content: "Tạo sự kiện thành công",
       });
       
       setFormData(EventFormState);
+      setPostId(null);
       onClose();
       if (onSuccess) {
         onSuccess();
@@ -323,6 +331,24 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
                 />
               </Grid>
             )}
+
+            <Grid item xs={12}>
+              <FormControl fullWidth margin="dense">
+                <InputLabel id="post-select-label">Chọn bài viết chi tiết</InputLabel>
+                <Select
+                  labelId="post-select-label"
+                  value={postId ?? ''}
+                  label="Chọn bài viết chi tiết"
+                  onChange={e => setPostId(Number(e.target.value) || null)}
+                  displayEmpty
+                >
+                  <MenuItem value="">-- Không chọn --</MenuItem>
+                  {postOptions.map((post) => (
+                    <MenuItem key={post.id} value={post.id}>{post.title}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
           </Grid>
         </Box>
       </DialogContent>

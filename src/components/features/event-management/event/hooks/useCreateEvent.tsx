@@ -3,7 +3,7 @@ import { EventStatus, EventType } from "@prisma/client";
 
 interface CreateEventData {
   title: string;
-  type: EventType
+  type: EventType;
   status: EventStatus;
   startDate: Date;
   endDate: Date;
@@ -11,7 +11,8 @@ interface CreateEventData {
   mapLink: string;
   image: string;
   description: string;
-  goalAmount?: number; 
+  goalAmount?: number;
+  postId?: number; // liên kết bài viết
 }
 
 export const useCreateEvent = () => {

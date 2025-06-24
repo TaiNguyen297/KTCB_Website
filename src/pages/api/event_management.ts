@@ -32,10 +32,6 @@ export default async function handler(
         if(type == "event"){
           const data = req.body;
 
-        if (!data) {
-          return res.status(400).json({ message: "Content not found" });
-        }
-
         const event = await prisma.event.create({
           data: {
             title: data.title,
@@ -48,6 +44,7 @@ export default async function handler(
             image: data.image,
             description: data.description,
             goalAmount: data.goalAmount,
+            postId: data.postId,
           }
         });
 
@@ -56,10 +53,6 @@ export default async function handler(
 
         if(type == "register"){
           const data = req.body;
-
-        if (!data) {
-          return res.status(400).json({ message: "Content not found" });
-        }
 
         const user = await prisma.eventRegistration.create({
           data: {
@@ -89,9 +82,7 @@ export default async function handler(
 
         if(type == "eventResult") {
           const data = req.body;
-          if (!data || !data.eventId) {
-            return res.status(400).json({ message: "Thiếu eventId hoặc dữ liệu không hợp lệ" });
-          }
+         
           const eventResult = await prisma.eventResult.create({
             data: {
               event: { connect: { id: Number(data.eventId) } },
@@ -154,11 +145,10 @@ export default async function handler(
 
       case "PUT": {
         const { type } = req.query;
+        
         if (type === "eventResult") {
           const updateData = req.body;
-          if (!updateData || !updateData.id) {
-            return res.status(400).json({ message: "Thiếu id hoặc dữ liệu không hợp lệ" });
-          }
+
           const updated = await prisma.eventResult.update({
             where: { id: Number(updateData.id) },
             data: {
@@ -172,11 +162,10 @@ export default async function handler(
           });
           return res.status(200).json(updated);
         }
+
         if (type === "event") {
           const data: UpdateEventDto = req.body;
-          if (!data) {
-            return res.status(400).json({ message: "Content not found" });
-          }
+          
           const event = await prisma.event.update({
             where: {
               id: data.id,

@@ -6,7 +6,7 @@ export const useUpdateEvent = () => {
 
   return useMutation({
     mutationFn: async (event: UpdateEventDto) => {
-      const response = await fetch("/api/event_management", {
+      const response = await fetch("api/event_management?type=event", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(event),
