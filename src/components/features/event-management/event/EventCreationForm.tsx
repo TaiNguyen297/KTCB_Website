@@ -259,7 +259,7 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
             </Grid>
             
             {/* Địa điểm và link bản đồ chỉ hiển thị nếu không phải Quyên góp */}
-            {formData.type !== EventType.DONATION && (
+            {String(formData.type) === "VOLUNTEER" && (
               <>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -316,7 +316,7 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
             </Grid>
 
             {/* Nếu là Quyên góp thì render field nhập số tiền mục tiêu */}
-            {formData.type === EventType.DONATION && (
+            {String(formData.type) === "DONATION" && (
               <Grid item xs={12} sm={6}>
                 <TextField
                   name="goalAmount"
@@ -342,7 +342,6 @@ const EventCreationForm: React.FC<EventCreationFormProps> = ({
                   onChange={e => setPostId(Number(e.target.value) || null)}
                   displayEmpty
                 >
-                  <MenuItem value="">-- Không chọn --</MenuItem>
                   {postOptions.map((post) => (
                     <MenuItem key={post.id} value={post.id}>{post.title}</MenuItem>
                   ))}

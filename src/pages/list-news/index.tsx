@@ -10,7 +10,6 @@ import logoImg from "../../../public/ktcb-logo-512.png";
 import styles from "@/styles/News.module.css";
 import { useRouter } from "next/router";
 import { CoverImageBrand } from "@/components/features/home/components/CoverImageBrand";
-import FundraisingCampaignList from "@/components/features/news/components/FundraisingCampaignList";
 
 const ListNews = () => {
   const route = useRouter();
@@ -34,10 +33,6 @@ const ListNews = () => {
 
           <CoverImageBrand team={teamParam} />
         </Box>
-
-        <Container maxWidth="xl" sx={{ mt: 4 }}>
-          <FundraisingCampaignList />
-        </Container>
 
         {highlightNews || mediumNews ? (
           <Container maxWidth="xl">
