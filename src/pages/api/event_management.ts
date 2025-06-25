@@ -18,6 +18,7 @@ export interface UpdateEventDto {
   image: string;
   description: string;
   goalAmount?: number; 
+  postId?: number; // Thêm trường postId nếu cần liên kết với bài viết
 }
 
 export default async function handler(
@@ -181,6 +182,7 @@ export default async function handler(
               image: data.image,
               description: data.description,
               goalAmount: data.goalAmount,
+              postId: data.postId,
             },
           });
           return res.status(201).json(event);

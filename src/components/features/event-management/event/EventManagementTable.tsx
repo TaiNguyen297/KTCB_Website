@@ -41,6 +41,7 @@ export interface IEventManagement extends IEvent {
   _count?: {
     eventRegistrations: number;
   };
+  postId?: number; // Thêm trường postId nếu cần liên kết với bài viết
 }
 
 interface StatusOption {

@@ -24,6 +24,7 @@ type Props = {
     description: string;
     startDate: string;
     endDate: string;
+    postId?: number; // Thêm trường postId
   };
   onViewPoster?: (poster: string) => void;
   onJoin?: () => void;
@@ -86,15 +87,21 @@ const DonationCard: React.FC<Props> = ({ event }) => {
         <Box sx={{ mt: 3, display: "flex", gap: 2 }}>
           <Button
             variant="contained"
-            fullWidth
             color="primary"
-            sx={{ mt: 1, borderRadius: 2 }}
-            onClick={() => {
-              if (event.status === "ONGOING" && event.type === "DONATION") setOpenForm(true);
-              // Có thể điều hướng hoặc xử lý khác cho các loại event khác
-            }}
+            sx={{ borderRadius: 2, flex: 1 }}
+            onClick={() => setOpenForm(true)}
+            disabled={event.type !== "DONATION"}
           >
-            {event.status === "ONGOING" ? (event.type === "DONATION" ? "Quyên góp ngay" : "Tham gia ngay") : "Xem chi tiết"}
+            Quyên góp ngay
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            sx={{ borderRadius: 2, flex: 1 }}
+            onClick={() => event.postId ? window.location.href = `/event-detail/${event.postId}` : window.location.href = "/404"}
+            disabled={!event.postId}
+          >
+            Xem chi tiết
           </Button>
         </Box>
         <DonationForm

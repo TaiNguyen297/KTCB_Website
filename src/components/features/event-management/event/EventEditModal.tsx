@@ -78,6 +78,27 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
     description: "",
   });
 
+  const [postOptions, setPostOptions] = useState<{id: number, title: string}[]>([]);
+  const [postId, setPostId] = useState<number | null>(null);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+
+  const fetchPosts = async () => {
+    setLoadingPosts(true);
+    try {
+      const res = await fetch("/api/news_management");
+      const data = await res.json();
+      setPostOptions(data.map((p: any) => ({ id: p.id, title: p.title })));
+    } catch (e) {
+      setPostOptions([]);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
   useEffect(() => {
     if (event) {
       setFormData({
@@ -93,6 +114,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
         description: event.description || "",
         goalAmount: event.goalAmount ?? undefined,
       });
+      setPostId(event.postId || null);
     }
   }, [event]);
 
@@ -139,7 +161,6 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
 
   const handleSubmit = async () => {
     if (!formData.id) return;
-    
     try {
       await updateEvent({
         id: formData.id!,
@@ -153,6 +174,7 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
         image: formData.image || "",
         description: formData.description || "",
         goalAmount: formData.type === EventType.DONATION ? (formData.goalAmount ? Number(formData.goalAmount) : undefined) : undefined,
+        postId: postId || undefined,
       });
       
       showModal(MODAL_TYPES.MODAL_SUCCESS, {
@@ -326,6 +348,24 @@ const EventEditModal: React.FC<EventEditModalProps> = ({
                 variant="outlined"
                 margin="dense"
               />
+            </Grid>
+
+            <Grid item xs={12}>
+              <FormControl fullWidth margin="dense">
+                <InputLabel id="post-select-label">Chọn bài viết chi tiết</InputLabel>
+                <Select
+                  labelId="post-select-label"
+                  value={postId ?? ''}
+                  label="Chọn bài viết chi tiết"
+                  onChange={e => setPostId(Number(e.target.value) || null)}
+                  displayEmpty
+                  endAdornment={loadingPosts ? <Box sx={{ pr: 2 }}><Typography variant="caption">Đang tải...</Typography></Box> : null}
+                >
+                  {postOptions.map((post) => (
+                    <MenuItem key={post.id} value={post.id}>{post.title}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
         </Box>

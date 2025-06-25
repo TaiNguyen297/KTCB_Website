@@ -41,6 +41,22 @@ export const RegisterTable = ({ data }: RegisterTableProps) => {
     setRowSelected(registration);
   };
 
+  const handleApprove = async (registration: IEventRegistration) => {
+    await fetch("/api/event_registration_action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: registration.id, action: "approve" }),
+    });
+  };
+
+  const handleReject = async (registration: IEventRegistration) => {
+    await fetch("/api/event_registration_action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: registration.id, action: "reject" }),
+    });
+  };
+
   const columns = useMemo<MRT_ColumnDef<IEventRegistration>[]>(
     () => [
       {
@@ -97,12 +113,12 @@ export const RegisterTable = ({ data }: RegisterTableProps) => {
           </IconButton>
         </Tooltip>
         <Tooltip title="Duyệt">
-          <IconButton color="success" >
+          <IconButton color="success" onClick={() => handleApprove(row.original)}>
             <CheckIcon />
           </IconButton>
         </Tooltip>
         <Tooltip title="Từ chối">
-          <IconButton color="error" >
+          <IconButton color="error" onClick={() => handleReject(row.original)}>
             <ClearIcon />
           </IconButton>
         </Tooltip>

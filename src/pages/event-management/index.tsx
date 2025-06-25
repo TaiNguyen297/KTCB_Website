@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { ContainerXL } from "@/components/layouts/ContainerXL";
 import ToastSuccess from "@/components/shared/toasts/ToastSuccess";
 import { SEO } from "@/configs/seo.config";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, CircularProgress } from "@mui/material";
 import { QueryClient, dehydrate, useQuery } from "@tanstack/react-query";
 import { EventManagementTable } from "@/components/features/event-management/event/EventManagementTable";
 import { RegisterTable } from "@/components/features/event-management/register/RegisterTable";
@@ -16,9 +16,13 @@ import { getRegisterList } from "@/components/features/event-management/register
 import { getPersonInterview } from "@/components/features/recruitment-management/services/get-member-registration";
 import EventReport from "@/components/features/event-management/event/EventReport";
 
+const TAB_EVENT = 0;
+const TAB_REGISTER = 1;
+const TAB_REPORT = 2;
 
 const RecruitmentManagementPage = () => {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
   const { data: session } = useSession({
     required: true,
     onUnauthenticated() {
@@ -26,44 +30,80 @@ const RecruitmentManagementPage = () => {
     },
   });
 
-  console.log(session);
-  
-  const router = useRouter();
-
   const { watch, setValue } = useForm<{ tabIndex: number }>({
     defaultValues: {
       tabIndex: 0,
     },
   });
+  const tabIndex = watch("tabIndex");
 
-  // This useQuery could just as well happen in some deeper child to
-  // the "Posts"-page, data will be available immediately either way
-  const { data, refetch } = useQuery({
+  // Only fetch eventList when tabIndex is 0 or 2
+  const {
+    data: eventData,
+    isLoading: isEventLoading,
+    refetch: refetchEvent,
+  } = useQuery({
     queryKey: ["eventList"],
     queryFn: () => getEventList(),
+    enabled: tabIndex === TAB_EVENT || tabIndex === TAB_REPORT,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    cacheTime: 1000 * 60 * 10, // 10 minutes
   });
 
-  // This query was not prefetched on the server and will not start
-  // fetching until on the client, both patterns are fine to mix
-  const { data: RegisterData } = useQuery({
+  // Only fetch registerList when tabIndex is 1
+  const {
+    data: registerData,
+    isLoading: isRegisterLoading,
+  } = useQuery({
     queryKey: ["registerList"],
     queryFn: () => getRegisterList(),
-  });
-
-  console.log({
-    data,
-    RegisterData,
+    enabled: tabIndex === TAB_REGISTER,
+    staleTime: 1000 * 60 * 5,
+    cacheTime: 1000 * 60 * 10,
   });
 
   const tabElement = [
     {
-      element: <EventManagementTable data={data} />,
+      element: isEventLoading ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight={200}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <EventManagementTable data={eventData} />
+      ),
     },
     {
-      element: <RegisterTable data={RegisterData}/> ,
+      element: isRegisterLoading ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight={200}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <RegisterTable data={registerData} />
+      ),
     },
     {
-      element: <EventReport data={data} onReportAdded={refetch} />,
+      element: isEventLoading ? (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight={200}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <EventReport data={eventData} onReportAdded={refetchEvent} />
+      ),
     },
   ];
 
@@ -94,8 +134,8 @@ const RecruitmentManagementPage = () => {
               textWrap: "nowrap",
             }}
             color="secondary"
-            disabled={watch("tabIndex") === 0}
-            onClick={() => setValue("tabIndex", 0)}
+            disabled={tabIndex === TAB_EVENT}
+            onClick={() => setValue("tabIndex", TAB_EVENT)}
           >
             Danh sách sự kiện
           </Button>
@@ -105,9 +145,9 @@ const RecruitmentManagementPage = () => {
               width: "fit-content",
               textWrap: "nowrap",
             }}
-            disabled={watch("tabIndex") === 1}
+            disabled={tabIndex === TAB_REGISTER}
             color="secondary"
-            onClick={() => setValue("tabIndex", 1)}
+            onClick={() => setValue("tabIndex", TAB_REGISTER)}
           >
             Danh sách đăng ký
           </Button>
@@ -117,26 +157,26 @@ const RecruitmentManagementPage = () => {
               width: "fit-content",
               textWrap: "nowrap",
             }}
-            disabled={watch("tabIndex") === 2}
+            disabled={tabIndex === TAB_REPORT}
             color="secondary"
-            onClick={() => setValue("tabIndex", 2)}
+            onClick={() => setValue("tabIndex", TAB_REPORT)}
           >
             Báo cáo thống kê
           </Button>
         </div>
 
         <Typography fontSize={28} fontWeight={"bold"}>
-          {watch("tabIndex") === 0
+          {tabIndex === TAB_EVENT
             ? "Danh sách sự kiện"
-            : watch("tabIndex") === 1
+            : tabIndex === TAB_REGISTER
             ? "Danh sách đăng ký sự kiện"
             : "Tổng hợp báo cáo sự kiện"}
         </Typography>
 
         {tabElement.map((e, index) => {
           return (
-            <div hidden={watch("tabIndex") !== index} key={index}>
-              {watch("tabIndex") === index && <Box>{e.element}</Box>}
+            <div hidden={tabIndex !== index} key={index}>
+              {tabIndex === index && <Box>{e.element}</Box>}
             </div>
           );
         })}
@@ -148,14 +188,10 @@ const RecruitmentManagementPage = () => {
 export async function getStaticProps() {
   const queryClient = new QueryClient();
 
+  // Prefetch only eventList for hydration (optional)
   await queryClient.prefetchQuery({
     queryKey: ["eventList"],
     queryFn: () => getEventList(),
-  });
-
-  await queryClient.prefetchQuery({
-    queryKey: ["registerList"],
-    queryFn: () => getRegisterList(),
   });
 
   return {

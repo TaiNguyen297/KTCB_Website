@@ -71,7 +71,7 @@ model Event {
   eventRegistrations EventRegistration[]
   eventResult       EventResult?
   donations         Donation[]       // Chỉ dùng cho DONATION
-  postId            Int?             @unique            // Liên kết với bài viết chi tiết
+  postId            Int?             // Liên kết với bài viết chi tiết (1-n: nhiều sự kiện có thể dùng chung 1 bài viết)
   post              Post?            @relation(fields: [postId], references: [id])
 }
 
@@ -120,7 +120,7 @@ model Post {
   author      String?  // Tên tác giả
   published   Boolean  @default(false)
   isHighlight Boolean  @default(false)
-  event       Event?
+  events      Event[]  // 1-n: một bài viết có thể liên kết nhiều sự kiện
 }
 
 model Position {
