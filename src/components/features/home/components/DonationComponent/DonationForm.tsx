@@ -17,7 +17,7 @@ interface DonationFormProps {
 }
 
 const paymentMethods = [
-  { value: "ZALOPAY", label: "ZaloPay" },
+  { value: "MOMO", label: "MoMo" },
 ];
 
 const DonationForm: React.FC<DonationFormProps> = ({ open, onClose, onSubmit, eventTitle }) => {
@@ -26,7 +26,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ open, onClose, onSubmit, ev
       fullName: "",
       email: "",
       amount: 0,
-      paymentMethod: "ZALOPAY",
+      paymentMethod: "MOMO",
     },
   });
 
@@ -35,20 +35,22 @@ const DonationForm: React.FC<DonationFormProps> = ({ open, onClose, onSubmit, ev
     onClose();
   };
 
-  const handleRedirectZaloPay = async (values: DonationFormValues) => {
-    // Gọi API backend tạo order ZaloPay, nhận về url thanh toán
-    const res = await fetch("/api/zalo_pay", {
+  const handleRedirectMomo = async (values: DonationFormValues) => {
+    // Gọi API backend tạo order MoMo, nhận về url thanh toán
+    const res = await fetch("/api/create_zalo_payment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
+      body: JSON.stringify({ amount: values.amount, orderInfo: `Ủng hộ sự kiện: ${eventTitle || ''}` }),
     });
     if (res.ok) {
       const data = await res.json();
       if (data?.payUrl) {
         window.location.href = data.payUrl;
+      } else {
+        alert("Không thể tạo giao dịch MoMo. Vui lòng thử lại.");
       }
     } else {
-      alert("Không thể tạo giao dịch ZaloPay. Vui lòng thử lại.");
+      alert("Không thể tạo giao dịch MoMo. Vui lòng thử lại.");
     }
   };
 
@@ -58,12 +60,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ open, onClose, onSubmit, ev
       <DialogContent>
         <form
           onSubmit={handleSubmit(async (values) => {
-            if (values.paymentMethod === "ZALOPAY") {
-              await handleRedirectZaloPay(values);
-            } else {
-              onSubmit(values);
-              handleClose();
-            }
+            await handleRedirectMomo(values);
           })}
         >
           <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -115,7 +112,12 @@ const DonationForm: React.FC<DonationFormProps> = ({ open, onClose, onSubmit, ev
             </Grid>
             <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
               <Button onClick={handleClose} color="inherit">Hủy</Button>
-              <Button type="submit" variant="contained">Quyên góp</Button>
+              <Button
+                type="submit"
+                variant="contained"
+              >
+                Quyên góp
+              </Button>
             </Grid>
           </Grid>
         </form>
