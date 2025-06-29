@@ -11,6 +11,7 @@ import { ContainerXL } from "@/components/layouts/ContainerXL";
 import ToastSuccess from "@/components/shared/toasts/ToastSuccess";
 import { useRouter } from "next/router";
 import { PasswordInput } from "@/components/shared/inputs/PasswordInput";
+import { useSession } from "next-auth/react";
 
 const COL_SPAN = {
   xs: 12,
@@ -21,6 +22,7 @@ const COL_SPAN = {
 export const ChangePassword = () => {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
+  const { data: session } = useSession();
 
   const {
     control,
@@ -35,10 +37,27 @@ export const ChangePassword = () => {
     },
   });
 
-  const onSubmit = handleSubmit((data) => {
-    console.log(data);
-
-    setOpen(true);
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      if (!session?.user?.email) throw new Error("Không tìm thấy Email người dùng");
+      const res = await fetch("/api/change_password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userEmail: session.user.email,
+          current_password: data.current_password,
+          new_password: data.new_password,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.message || "Đổi mật khẩu thất bại");
+        return;
+      }
+      setOpen(true);
+    } catch (e: any) {
+      alert(e.message || "Đổi mật khẩu thất bại");
+    }
   });
 
   return (
