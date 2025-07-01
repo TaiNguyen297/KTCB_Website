@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/libs/prisma";
 import { EventStatus } from "@prisma/client";
+import { updateEventsStatus, updateEventStatus } from "@/utils/eventStatus";
 
 export interface DeleteEventDto {
   id: number;
@@ -108,16 +109,29 @@ export default async function handler(
             include: {
               eventRegistrations: true,
               eventResult: true,
+              donations: true, // Include donations để tính tổng
             },
           });
           if (!event) return res.status(404).json({ message: "Không tìm thấy sự kiện" });
-          return res.status(200).json(event);
+          
+          // Tính tổng amount từ donations
+          const eventWithAmount = {
+            ...event,
+            amount: event.donations.reduce((sum, donation) => sum + donation.amount, 0),
+            // Giữ lại donations array cho event detail
+          };
+          
+          // Tự động cập nhật trạng thái dựa theo thời gian
+          const eventWithUpdatedStatus = updateEventStatus(eventWithAmount);
+          
+          return res.status(200).json(eventWithUpdatedStatus);
         }
 
         if (type === "event") {
           const events = await prisma.event.findMany({
             include: {
               eventResult: true,
+              donations: true, // Include donations để tính tổng
               _count: {
                 select: {
                   eventRegistrations: true
@@ -125,7 +139,25 @@ export default async function handler(
               }
             }
           });
-          return res.status(200).json(events);
+          
+          // Tính tổng amount từ donations cho mỗi event
+          const eventsWithAmount = events.map(event => {
+            const totalAmount = event.donations.reduce((sum, donation) => sum + donation.amount, 0);
+            console.log(`Event ${event.id} (${event.title}): ${event.donations.length} donations, total: ${totalAmount}`);
+            return {
+              ...event,
+              amount: totalAmount,
+              // Không trả về donations array để giảm dung lượng response
+              donations: undefined
+            };
+          });
+          
+          // Tự động cập nhật trạng thái dựa theo thời gian
+          const eventsWithUpdatedStatus = updateEventsStatus(eventsWithAmount);
+          
+          console.log("Final events with amount and status:", eventsWithUpdatedStatus.map(e => ({ id: e.id, title: e.title, amount: e.amount, status: e.status })));
+          
+          return res.status(200).json(eventsWithUpdatedStatus);
         }
 
         if (type === "registration") {

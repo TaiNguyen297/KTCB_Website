@@ -21,6 +21,7 @@ type Props = {
     status: string;
     goalAmount?: number;
     currentAmount?: number;
+    amount?: number; // Tổng tiền từ bảng Donation
     description: string;
     startDate: string;
     endDate: string;
@@ -34,9 +35,10 @@ const formatDate = (date: string) => new Date(date).toLocaleDateString("vi-VN");
 
 const DonationCard: React.FC<Props> = ({ event }) => {
   const [openForm, setOpenForm] = useState(false);
+
   const progress =
-    event.goalAmount && event.currentAmount
-      ? Math.min(100, Math.round((event.currentAmount / event.goalAmount) * 100))
+    event.goalAmount && (event.amount || 0) > 0
+      ? Math.min(100, Math.round(((event.amount || 0) / event.goalAmount) * 100))
       : 0;
   return (
     <Card key={event.id} sx={{ width: "100%", maxWidth: 650, mx: "auto", borderRadius: 2, overflow: "hidden" }}>
@@ -77,7 +79,7 @@ const DonationCard: React.FC<Props> = ({ event }) => {
               />
             </Box>
             <Typography variant="body2" fontWeight={500}>
-              Đã quyên góp: {(event.currentAmount || 0).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
+              Đã quyên góp: {(event.amount || 0).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
             </Typography>
             <Typography variant="body2" fontWeight={500}>
               Mục tiêu: {(event.goalAmount || 0).toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
@@ -108,6 +110,7 @@ const DonationCard: React.FC<Props> = ({ event }) => {
           open={openForm}
           onClose={() => setOpenForm(false)}
           eventTitle={event.title}
+          eventId={event.id} // Truyền eventId động
           onSubmit={(values) => {
             // TODO: Gọi API quyên góp ở đây, truyền eventId, values
             // Ví dụ: donateToEvent({ ...values, eventId: event.id })

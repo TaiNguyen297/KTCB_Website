@@ -1,5 +1,5 @@
-import React from "react";
-import { Dialog, DialogContent, DialogTitle, TextField, Button, MenuItem, Grid } from "@mui/material";
+import React, { useEffect } from "react";
+import { Dialog, DialogContent, DialogTitle, TextField, Button, Grid } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 
 export interface DonationFormValues {
@@ -14,14 +14,11 @@ interface DonationFormProps {
   onClose: () => void;
   onSubmit: (values: DonationFormValues) => void;
   eventTitle?: string;
+  eventId?: number; // Thêm prop eventId nếu cần truyền
 }
 
-const paymentMethods = [
-  { value: "MOMO", label: "MoMo" },
-];
-
-const DonationForm: React.FC<DonationFormProps> = ({ open, onClose, onSubmit, eventTitle }) => {
-  const { handleSubmit, control, reset, watch } = useForm<DonationFormValues>({
+const DonationForm: React.FC<DonationFormProps> = ({ open, onClose, onSubmit, eventTitle, eventId }) => {
+  const { handleSubmit, control, reset, watch, setValue } = useForm<DonationFormValues>({
     defaultValues: {
       fullName: "",
       email: "",
@@ -30,17 +27,40 @@ const DonationForm: React.FC<DonationFormProps> = ({ open, onClose, onSubmit, ev
     },
   });
 
+  // Đảm bảo luôn set paymentMethod là MOMO khi mở form
+  useEffect(() => {
+    if (open) {
+      setValue("paymentMethod", "MOMO");
+    }
+  }, [open, setValue]);
+
   const handleClose = () => {
     reset();
     onClose();
   };
 
   const handleRedirectMomo = async (values: DonationFormValues) => {
+    // Tạo orderId duy nhất cho giao dịch (MoMo yêu cầu chúng ta gửi orderId)
+    const orderId = `ORDER_${Date.now()}`;
+    console.log('orderId tạo bởi FE:', orderId, values); // Log orderId FE
+    
     // Gọi API backend tạo order MoMo, nhận về url thanh toán
-    const res = await fetch("/api/create_zalo_payment", {
+    // Truyền thông tin form để lưu sau khi thanh toán thành công
+    const res = await fetch("/api/create_momo_payment", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: values.amount, orderInfo: `Ủng hộ sự kiện: ${eventTitle || ''}` }),
+      body: JSON.stringify({
+        amount: values.amount,
+        orderInfo: `Ủng hộ sự kiện: ${eventTitle || ''}`,
+        orderId,
+        // Truyền thông tin form để lưu sau khi thanh toán thành công
+        donorInfo: {
+          fullName: values.fullName,
+          email: values.email,
+          paymentMethod: values.paymentMethod,
+          eventId: eventId,
+        }
+      }),
     });
     if (res.ok) {
       const data = await res.json();
@@ -95,19 +115,12 @@ const DonationForm: React.FC<DonationFormProps> = ({ open, onClose, onSubmit, ev
               />
             </Grid>
             <Grid item xs={12}>
-              <Controller
-                disabled={true}
-                name="paymentMethod"
-                control={control}
-                render={({ field }) => (
-                  <TextField {...field} label="Phương thức thanh toán" select fullWidth>
-                    {paymentMethods.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
+              {/* Không dùng input hidden nữa, chỉ hiển thị readonly */}
+              <TextField
+                label="Phương thức thanh toán"
+                value="MoMo"
+                fullWidth
+                InputProps={{ readOnly: true }}
               />
             </Grid>
             <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>

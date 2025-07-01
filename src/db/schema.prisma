@@ -95,6 +95,7 @@ model Donation {
   paymentMethod   String
   event           Event  @relation(fields: [eventId], references: [id])
   eventId         Int
+  orderId         String   @unique
   createdAt       DateTime @default(now())
 }
 

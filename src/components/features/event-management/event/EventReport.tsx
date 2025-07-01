@@ -13,6 +13,7 @@ import { Chip } from "@mui/material";
 import { addEventReport } from "./service/add-event-report";
 import { updateEventReport } from "./service/update-event-report";
 import { MODAL_TYPES, useGlobalModalContext } from "../../global-modal/GlobalModal";
+import { getEventStatusColor, getEventStatusLabel } from "@/utils/eventStatus";
 
 interface EventReportProps {
   data?: any[];
@@ -87,7 +88,7 @@ export const EventReport = ({ data, onReportAdded }: EventReportProps) => {
         accessorKey: "eventResult",
         header: "Đã có báo cáo?",
         size: 100,
-        Cell: ({ cell }) => cell.getValue() ? "✅" : "❌",
+        Cell: ({ cell }) => cell.getValue() ? "Có" : "Chưa có",
         enableSorting: false,
       },
     ],

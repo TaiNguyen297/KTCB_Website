@@ -1,6 +1,9 @@
 // pages/api/payment.js
 import type { NextApiRequest, NextApiResponse } from "next";
 import crypto from "crypto";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
@@ -16,13 +19,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     MOMO_LANG,
   } = process.env;
 
-  const orderId = `ORDER_${Date.now()}`;
+  const { amount, orderInfo, orderId, donorInfo } = req.body;
+  const finalOrderId = orderId || `ORDER_${Date.now()}`;
   const requestId = `${Date.now()}`;
-  const orderInfo = "Thanh toán MoMo";
-  const amount = req.body.amount; // amount should be an integer, as sent from the frontend
-  const extraData = "";
+  const finalOrderInfo = orderInfo || "Thanh toán MoMo";
+  
+  // Lưu thông tin donor tạm thời để sử dụng khi callback
+  // Chúng ta sẽ encode donorInfo vào extraData
+  const extraData = donorInfo ? Buffer.from(JSON.stringify(donorInfo)).toString('base64') : "";
 
-  const rawSignature = `accessKey=${MOMO_ACCESS_KEY}&amount=${amount}&extraData=${extraData}&ipnUrl=${MOMO_IPN_URL}&orderId=${orderId}&orderInfo=${orderInfo}&partnerCode=${MOMO_PARTNER_CODE}&redirectUrl=${MOMO_REDIRECT_URL}&requestId=${requestId}&requestType=${MOMO_REQUEST_TYPE}`;
+  const rawSignature = `accessKey=${MOMO_ACCESS_KEY}&amount=${amount}&extraData=${extraData}&ipnUrl=${MOMO_IPN_URL}&orderId=${finalOrderId}&orderInfo=${finalOrderInfo}&partnerCode=${MOMO_PARTNER_CODE}&redirectUrl=${MOMO_REDIRECT_URL}&requestId=${requestId}&requestType=${MOMO_REQUEST_TYPE}`;
 
   const signature = crypto
     .createHmac("sha256", MOMO_SECRET_KEY!)
@@ -34,8 +40,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     accessKey: MOMO_ACCESS_KEY,
     requestId,
     amount,
-    orderId,
-    orderInfo,
+    orderId: finalOrderId,
+    orderInfo: finalOrderInfo,
     redirectUrl: MOMO_REDIRECT_URL,
     ipnUrl: MOMO_IPN_URL,
     extraData,
