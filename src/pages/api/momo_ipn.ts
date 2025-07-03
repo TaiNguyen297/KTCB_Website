@@ -1,14 +1,23 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/libs/prisma";
+import crypto from "crypto";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "GET") {
-  return res.status(200).json({ message: "MoMo IPN route is live" });
-}
+  // Log toàn bộ thông tin request để debug IPN MoMo
+  console.log("[MoMo IPN] Incoming request:", {
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+    ip: req.socket?.remoteAddress,
+    body: req.body,
+  });
 
-  const body = req.body;
-  // Nếu dùng bodyParser mặc định, body có thể là string, cần parse lại
-  const data = typeof body === "string" ? JSON.parse(body) : body;
+  if (req.method !== "POST") {
+    console.error("[MoMo IPN] Method not allowed:", req.method);
+    return res.status(405).json({ resultCode: 1, message: "Method Not Allowed" });
+  }
+
+  const data = req.body;
 
   // Log dữ liệu callback từ MoMo để kiểm tra
   console.log("MoMo IPN callback:", data);
@@ -40,6 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             orderId: data.orderId,
           },
         });
+        console.log("[MoMo IPN] Donation created:", donation);
       } else {
         console.error("No donor info found in extraData");
       }
@@ -49,5 +59,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   // Trả về đúng format cho MoMo
+  console.log("[MoMo IPN] Response sent to MoMo");
   return res.status(200).json({ resultCode: 0, message: "Confirm Success" });
 }
