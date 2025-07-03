@@ -45,7 +45,6 @@
     "eslint": "8.42.0",
     "eslint-config-next": "13.4.5",
     "file-saver": "^2.0.5",
-    "formidable": "^3.5.4",
     "material-react-table": "^2.0.6",
     "mui-nested-menu": "^3.2.2",
     "next": "13.4.5",
