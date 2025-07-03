@@ -1,9 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/libs/prisma";
-import crypto from "crypto";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).end();
+  if (req.method === "GET") {
+  return res.status(200).json({ message: "MoMo IPN route is live" });
+}
 
   const body = req.body;
   // Nếu dùng bodyParser mặc định, body có thể là string, cần parse lại
