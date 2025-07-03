@@ -13,7 +13,6 @@ import { Chip } from "@mui/material";
 import { addEventReport } from "./service/add-event-report";
 import { updateEventReport } from "./service/update-event-report";
 import { MODAL_TYPES, useGlobalModalContext } from "../../global-modal/GlobalModal";
-import { getEventStatusColor, getEventStatusLabel } from "@/utils/eventStatus";
 
 interface EventReportProps {
   data?: any[];

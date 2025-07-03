@@ -26,22 +26,33 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dt5gcqfsy";
+  const UPLOAD_PRESET = "ktcb_cloudinary";
+
+  const uploadToCloudinary = async (file: File): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", UPLOAD_PRESET);
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json();
+    return data.secure_url || null;
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
-      // Trong thực tế, bạn sẽ cần uploading file lên server và lấy URL
-      // Ở đây chúng ta chỉ tạo một URL local để preview
-      const objectUrl = URL.createObjectURL(file);
-      setPreviewUrl(objectUrl);
-      
-      // Giả lập upload file và nhận URL từ server sau 1 giây
-      setTimeout(() => {
-        // Trong ứng dụng thực tế, đây sẽ là URL trả về từ server sau khi upload
-        const fakeServerUrl = objectUrl;
-        setUrlInput(fakeServerUrl);
-        onImageChange(fakeServerUrl);
-      }, 1000);
+      setPreviewUrl(""); // Xóa preview cũ
+      // Upload lên Cloudinary
+      const url = await uploadToCloudinary(file);
+      if (url) {
+        setPreviewUrl(url);
+        setUrlInput(url);
+        onImageChange(url);
+      }
     }
   };
 
@@ -54,23 +65,20 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     setIsDragging(false);
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
-    
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       const file = files[0];
       if (file.type.startsWith('image/')) {
-        // Tương tự như handleFileChange
-        const objectUrl = URL.createObjectURL(file);
-        setPreviewUrl(objectUrl);
-        
-        setTimeout(() => {
-          const fakeServerUrl = objectUrl;
-          setUrlInput(fakeServerUrl);
-          onImageChange(fakeServerUrl);
-        }, 1000);
+        setPreviewUrl("");
+        const url = await uploadToCloudinary(file);
+        if (url) {
+          setPreviewUrl(url);
+          setUrlInput(url);
+          onImageChange(url);
+        }
       }
     }
   };
@@ -164,4 +172,4 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       )}
     </Box>
   );
-}; 
+};

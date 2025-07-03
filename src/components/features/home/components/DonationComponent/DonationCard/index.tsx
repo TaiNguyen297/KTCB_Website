@@ -64,6 +64,18 @@ const DonationCard: React.FC<Props> = ({ event }) => {
         </Box>
         {event.type === "DONATION" && (
           <>
+            {/* Thẻ trạng thái quyên góp */}
+            <Box sx={{ mb: 1 }}>
+              {(event.amount || 0) >= (event.goalAmount || 0) && event.goalAmount ? (
+                <Box sx={{ display: 'inline-block', px: 2, py: 0.5, borderRadius: 2, bgcolor: 'success.main', color: 'white', fontWeight: 600, fontSize: 14 }}>
+                  Đã hoàn thành
+                </Box>
+              ) : (
+                <Box sx={{ display: 'inline-block', px: 2, py: 0.5, borderRadius: 2, bgcolor: 'warning.main', color: 'white', fontWeight: 600, fontSize: 14 }}>
+                  Đang huy động
+                </Box>
+              )}
+            </Box>
             <Box sx={{ mt: 2, alignItems: "center", gap: 1, mb: 1 }}>
               <LinearProgress
                 variant="determinate"

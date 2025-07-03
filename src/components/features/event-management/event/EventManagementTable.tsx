@@ -124,7 +124,6 @@ const EventManagementTable = (props: { data: IEventManagement[] }) => {
       { accessorKey: "status", header: "Trạng thái", size: 120, Cell: (props) => <EllipsisCell {...props} /> },
       { accessorKey: "startDate", header: "Bắt đầu", size: 120, Cell: ({ cell }) => cell.getValue() ? new Date(cell.getValue<string>()).toLocaleDateString("vi") : "" },
       { accessorKey: "endDate", header: "Kết thúc", size: 120, Cell: ({ cell }) => cell.getValue() ? new Date(cell.getValue<string>()).toLocaleDateString("vi") : "" },
-      { accessorKey: "location", header: "Địa điểm", size: 200, Cell: (props) => <EllipsisCell {...props} /> },
       { accessorKey: "goalAmount", header: "Mục tiêu (VNĐ)", size: 150, Cell: ({ cell }) => cell.getValue() ? Number(cell.getValue()).toLocaleString("vi-VN") : "" },
       { accessorKey: "amount", header: "Đã quyên góp (VNĐ)", size: 150, Cell: ({ cell }) => cell.getValue() ? Number(cell.getValue()).toLocaleString("vi-VN") : "" },
     ],
