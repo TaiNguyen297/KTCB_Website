@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Box, Button, Grid, FormControl, InputLabel, Select, MenuItem, FormHelperText, Checkbox, FormGroup, FormControlLabel, CircularProgress, Typography } from '@mui/material';
+import { Box, Button, Grid, FormControl, InputLabel, Select, MenuItem, FormHelperText, CircularProgress, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { getUserRoles, getAllRoles, getAllPermissions, updateUserRole } from './service/role-permission-service';
+import { getUserRoles, getAllRoles, updateUserRole } from './service/role-permission-service';
 
 interface RolePermissionFormProps {
   userId: number;
@@ -51,6 +51,26 @@ export default function RolePermissionForm({ userId, onSuccess }: RolePermission
     }
   };
 
+  // Mapping permission name sang tiếng Việt
+  const permissionNameMap: Record<string, string> = {
+    EDIT_PROFILE: 'Chỉnh sửa hồ sơ cá nhân',
+    VIEW_INTERNAL_DOCS: 'Xem tài liệu nội bộ',
+    VIEW_MEMBERS: 'Xem danh sách thành viên',
+    MANAGE_MEMBERS: 'Quản lý thành viên',
+    // CREATE_PAYMENT_REQUEST: 'Tạo yêu cầu thanh toán',
+    // PROCESS_PAYMENT: 'Xử lý thanh toán',
+    APPROVE_PAYMENT: 'Duyệt thanh toán',
+    VIEW_APPLICATIONS: 'Xem đơn tuyến',
+    EDIT_APPLICATIONS: 'Chỉnh sửa đơn tuyến',
+    SHARE_POSTS: 'Chia sẻ bài viết',
+    MANAGE_EVENT: 'Quản lý sự kiện',
+    MANAGE_POST: 'Quản lý bài viết'
+  };
+
+  // Lấy danh sách quyền của role đang chọn
+  const selectedRolePermissions =
+    roles?.find((role: any) => role.id === selectedRoleId)?.permissions || [];
+
   if (loadingRoles || loadingUserRole) {
     return <CircularProgress size={24} />;
   }
@@ -77,15 +97,15 @@ export default function RolePermissionForm({ userId, onSuccess }: RolePermission
           </FormControl>
         </Grid>
 
-        {selectedRoleId && userRoleData?.permissions && (
+        {selectedRoleId && selectedRolePermissions.length > 0 && (
           <Grid item xs={12}>
             <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>
               Quyền hạn của vai trò này:
             </Typography>
             <Box sx={{ pl: 2 }}>
-              {userRoleData.permissions.map((permission: any) => (
-                <Typography key={permission.id} variant="body2">
-                  • {permission.name}
+              {selectedRolePermissions.map((permission: any) => (
+                <Typography key={permission.id || permission.name} variant="body2">
+                  • {permissionNameMap[permission.name] || permission.name}
                 </Typography>
               ))}
             </Box>

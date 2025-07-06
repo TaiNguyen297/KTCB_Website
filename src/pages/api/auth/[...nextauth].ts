@@ -22,6 +22,7 @@ export const authOptions: NextAuthOptions = {
         // Tìm người dùng trong database
         const user = await prisma.user.findFirst({
           where: { email: email },
+          include: { role: true }, // Lấy cả thông tin role
         });
 
         if (!user) {
@@ -41,6 +42,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id.toString(),
           email: user.email,
           name: user.username,
+          roleId: user.roleId,
         };
       },
     }),
@@ -49,7 +51,8 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       // Thêm thông tin người dùng vào token
       if (user) {
-        token.email = user.email;
+        token.email = (user as any).email;
+        token.roleId = (user as any).roleId;
       }
       return token;
     },
@@ -59,7 +62,9 @@ export const authOptions: NextAuthOptions = {
         session.user = {
           ...session.user,
           email: token.email as string,
-        };
+          roleId: token.roleId
+        } as any;
+        console.log("Session user:", session.user);
       }
       return session;
     },

@@ -19,9 +19,63 @@ const Header = () => {
   const [openSideMenu, setOpenSideMenu] = useState(false);
   const { data: session } = useSession();
 
+  console.log("Session in Header:", session);
+
   const handleToggleSideMenu = () => {
     setOpenSideMenu((prev) => !prev);
   };
+
+  // Mapping roleId sang permissions (theo seed)
+  const rolePermissionsMap: Record<number, string[]> = {
+    1: [ // MEMBER
+      "EDIT_PROFILE", "VIEW_INTERNAL_DOCS", "VIEW_MEMBERS"
+    ],
+    2: [ // TEAM_LEADER
+      "EDIT_PROFILE", "VIEW_INTERNAL_DOCS", "VIEW_MEMBERS", "VIEW_APPLICATIONS"
+    ],
+    3: [ // MEDIA_TEAM_LEADER
+      "EDIT_PROFILE", "VIEW_INTERNAL_DOCS", "VIEW_MEMBERS", "VIEW_APPLICATIONS", "SHARE_POSTS", "MANAGE_POST"
+    ],
+    4: [ // FINANCE_TEAM_LEADER
+      "EDIT_PROFILE", "VIEW_INTERNAL_DOCS", "VIEW_MEMBERS", "VIEW_APPLICATIONS", "EDIT_APPLICATIONS", "APPROVE_PAYMENT"
+    ],
+    5: [ // TREASURER
+      "EDIT_PROFILE", "VIEW_INTERNAL_DOCS", "VIEW_MEMBERS", "APPROVE_PAYMENT"
+    ],
+    6: [ // ADMIN
+      "EDIT_PROFILE", "VIEW_INTERNAL_DOCS", "VIEW_MEMBERS", "APPROVE_PAYMENT", "VIEW_APPLICATIONS", "EDIT_APPLICATIONS", "MANAGE_MEMBERS", "SHARE_POSTS", "MANAGE_EVENT", "MANAGE_POST"
+    ]
+  };
+
+  const getUserPermissions = (): string[] => {
+    // Lấy roleId từ session, ưu tiên ép kiểu về number
+    const roleId = session?.user && (session.user as any).roleId;
+    if (!roleId) return [];
+    return rolePermissionsMap[roleId];
+  };
+
+  // Hàm kiểm tra user có quyền với menu
+  const hasPermission = (menu: any, userPermissions: string[]): boolean => {
+    if (!menu.permissions) return true; // menu không yêu cầu quyền
+    return menu.permissions.some((p: string) => userPermissions.includes(p));
+  };
+
+  // Hàm lọc subMenus theo quyền
+  const filterMenuWithSubMenus = (menu: any, userPermissions: string[]) => {
+    if (!menu.subMenus) return menu;
+    
+    // Lọc subMenus theo quyền
+    const filteredSubMenus = menu.subMenus.filter((subMenu: any) => 
+      hasPermission(subMenu, userPermissions)
+    );
+    
+    return {
+      ...menu,
+      subMenus: filteredSubMenus
+    };
+  };
+
+  const userPermissions = getUserPermissions();
 
   return (
     <Box
@@ -65,12 +119,12 @@ const Header = () => {
             alignItems="center"
             spacing={7}
           >
-            {menuData.filter((menu) => session || !menu.internal).map((menu, index) => (
-              <MenuSection key={`${index}menu`} menuData={menu} />
-            ))}
-            {/* {menuData.map((menu, index) => (
-              <MenuSection key={`${index}menu`} menuData={menu} />
-            ))} */}
+            {menuData
+              .filter((menu) => (session || !menu.internal) && hasPermission(menu, userPermissions))
+              .map((menu) => filterMenuWithSubMenus(menu, userPermissions))
+              .map((menu, index) => (
+                <MenuSection key={`${index}menu`} menuData={menu} />
+              ))}
           </Stack>
         </Box>
 
@@ -93,7 +147,12 @@ const Header = () => {
       </Stack>
 
       <Drawer anchor="left" open={openSideMenu} onClose={handleToggleSideMenu}>
-        <VerticalMenu menuDatas={menuData} />
+        <VerticalMenu 
+          menuDatas={menuData
+            .filter((menu) => hasPermission(menu, userPermissions))
+            .map((menu) => filterMenuWithSubMenus(menu, userPermissions))
+          } 
+        />
       </Drawer>
     </Box>
   );

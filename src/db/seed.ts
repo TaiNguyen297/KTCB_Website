@@ -4,23 +4,22 @@ import { hash } from 'bcryptjs'
 const prisma = new PrismaClient()
 
 async function main() {
-  // seed users
   const password = await hash("ktcbtest", 12);
   const user = await prisma.user.create({
     data: {
-      username: "Nguyen Van A",
+      username: "Nguyen Huu Tai",
       email: "tainguyen29702@gmail.com",
       password: password,
       member: {
         connect: { id: 1 },
       },
       role: {
-        connect: { name: "CHAIRMAN" }, 
+        connect: { name: "ADMIN" }, 
       }
 
     }
   });
-  // console.log({ user });
+  console.log({ user });
 
   const member = await prisma.member.create({
     data: {
@@ -55,33 +54,24 @@ async function main() {
       { name: 'MANAGE_MEMBERS' },
 
       // Tài chính
-      { name: 'CREATE_PAYMENT_REQUEST' },
-      { name: 'PROCESS_PAYMENT' },
       { name: 'APPROVE_PAYMENT' },
 
-      // Đơn tuyến
+      // Đơn tuyển
       { name: 'VIEW_APPLICATIONS' },
       { name: 'EDIT_APPLICATIONS' },
 
       // Truyền thông
-      { name: 'SHARE_POSTS' }
+      { name: 'SHARE_POSTS' },
+
+      // Sự kiện
+      { name: 'MANAGE_EVENT' },
+
+      // Bài viết
+      { name: 'MANAGE_POST' }
     ],
     skipDuplicates: true
   });
 
-  // const event = await prisma.volunteerEvents.create({ 
-  //   data: {
-  //     title: "KTCB Volunteer Event",
-  //     description: "A volunteer event organized by KTCB.",
-  //     startDate: new Date("2024-05-01T10:00:00Z"),
-  //     endDate: new Date("2024-05-01T18:00:00Z"),
-  //     location: "Hanoi, Vietnam",
-  //     status: "UPCOMING",
-  //     mapLink: "https://maps.google.com",
-  //     image: "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482552zrD/anh-mo-ta.png",
-
-  //   },
-  // });
 
   // 3. Tạo các Role và gán Permission
   // Lấy tất cả permissions để map
@@ -93,42 +83,42 @@ async function main() {
   const roles = [
     {
       name: 'MEMBER',
-      permissions: getPermissionIds(['EDIT_PROFILE', 'VIEW_INTERNAL_DOCS', 'VIEW_MEMBERS'])
+      permissions: getPermissionIds(['EDIT_PROFILE', 'VIEW_INTERNAL_DOCS', 'VIEW_MEMBERS', 'MANAGE_EVENT', 'MANAGE_POST'])
     },
     {
       name: 'TEAM_LEADER',
       permissions: getPermissionIds([
         'EDIT_PROFILE', 'VIEW_INTERNAL_DOCS', 'VIEW_MEMBERS',
-        'CREATE_PAYMENT_REQUEST', 'VIEW_APPLICATIONS'
+        'VIEW_APPLICATIONS'
       ])
     },
     {
       name: 'MEDIA_TEAM_LEADER',
       permissions: getPermissionIds([
         'EDIT_PROFILE', 'VIEW_INTERNAL_DOCS', 'VIEW_MEMBERS',
-        'CREATE_PAYMENT_REQUEST', 'VIEW_APPLICATIONS', 'SHARE_POSTS'
+        'VIEW_APPLICATIONS', 'SHARE_POSTS', 'MANAGE_POST'
       ])
     },
     {
       name: 'FINANCE_TEAM_LEADER',
       permissions: getPermissionIds([
         'EDIT_PROFILE', 'VIEW_INTERNAL_DOCS', 'VIEW_MEMBERS',
-        'CREATE_PAYMENT_REQUEST', 'VIEW_APPLICATIONS', 'EDIT_APPLICATIONS'
+        'VIEW_APPLICATIONS', 'EDIT_APPLICATIONS', 'APPROVE_PAYMENT'
       ])
     },
     {
       name: 'TREASURER',
       permissions: getPermissionIds([
         'EDIT_PROFILE', 'VIEW_INTERNAL_DOCS', 'VIEW_MEMBERS',
-        'CREATE_PAYMENT_REQUEST', 'PROCESS_PAYMENT'
+        'APPROVE_PAYMENT'
       ])
     },
     {
-      name: 'CHAIRMAN',
+      name: 'ADMIN',
       permissions: getPermissionIds([
         'EDIT_PROFILE', 'VIEW_INTERNAL_DOCS', 'VIEW_MEMBERS',
-        'CREATE_PAYMENT_REQUEST', 'PROCESS_PAYMENT', 'APPROVE_PAYMENT',
-        'VIEW_APPLICATIONS', 'EDIT_APPLICATIONS', 'MANAGE_MEMBERS'
+        'APPROVE_PAYMENT', 'VIEW_APPLICATIONS', 'EDIT_APPLICATIONS', 
+        'MANAGE_MEMBERS', 'SHARE_POSTS', 'MANAGE_EVENT', 'MANAGE_POST'
       ])
     }
   ];
@@ -159,20 +149,20 @@ async function main() {
       name: 'Thành viên ban tổ chức',
     },
   });
-  await prisma.position.upsert({
-    where: { id: 3 },
-    update: {},
-    create: {
-      name: 'Thư ký',
-    },
-  });
-  await prisma.position.upsert({
-    where: { id: 4 },
-    update: {},
-    create: {
-      name: 'Chủ tịch',
-    },
-  });
+  // await prisma.position.upsert({
+  //   where: { id: 3 },
+  //   update: {},
+  //   create: {
+  //     name: 'Thư ký',
+  //   },
+  // });
+  // await prisma.position.upsert({
+  //   where: { id: 4 },
+  //   update: {},
+  //   create: {
+  //     name: 'Chủ tịch',
+  //   },
+  // });
 
   /// seed teams
   await prisma.team.upsert({

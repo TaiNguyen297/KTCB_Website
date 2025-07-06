@@ -57,12 +57,13 @@
       "name": "Nội bộ",
       "internal": true,
       "path": "/",
+      "permissions": ["VIEW_INTERNAL_DOCS"],
       "subMenus": [
-        { "name": "Quản lý đơn tuyển", "path": "/recruitment-management"},
-        { "name": "Danh sách thành viên", "path": "/member-list"},
-        { "name": "Quản lý thành viên", "path": "/member-management"},
-        { "name": "Quản lý sự kiện", "path": "/event-management"},
-        { "name": "Quản lý bài viết", "path": "/news-management"}
+        { "name": "Quản lý đơn tuyển", "path": "/recruitment-management", "permissions": ["VIEW_APPLICATIONS", "EDIT_APPLICATIONS"] },
+        { "name": "Danh sách thành viên", "path": "/member-list", "permissions": ["VIEW_MEMBERS"] },
+        { "name": "Quản lý thành viên", "path": "/member-management", "permissions": ["MANAGE_MEMBERS"] },
+        { "name": "Quản lý sự kiện", "path": "/event-management", "permissions": ["MANAGE_EVENT"] },
+        { "name": "Quản lý bài viết", "path": "/news-management", "permissions": ["MANAGE_POST"] }
       ]
     }
   ]

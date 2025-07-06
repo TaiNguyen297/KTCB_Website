@@ -37,7 +37,7 @@ const RecruitmentManagementPage = () => {
   });
   const tabIndex = watch("tabIndex");
 
-  // Only fetch eventList when tabIndex is 0 or 2
+  // Prefetch cả eventList và registerList, luôn enable để cache sẵn
   const {
     data: eventData,
     isLoading: isEventLoading,
@@ -45,21 +45,18 @@ const RecruitmentManagementPage = () => {
   } = useQuery({
     queryKey: ["eventList"],
     queryFn: () => getEventList(),
-    enabled: tabIndex === TAB_EVENT || tabIndex === TAB_REPORT,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    cacheTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 10, // 10 phút
+    cacheTime: 1000 * 60 * 30, // 30 phút
   });
 
-  // Only fetch registerList when tabIndex is 1
   const {
     data: registerData,
     isLoading: isRegisterLoading,
   } = useQuery({
     queryKey: ["registerList"],
     queryFn: () => getRegisterList(),
-    enabled: tabIndex === TAB_REGISTER,
-    staleTime: 1000 * 60 * 5,
-    cacheTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 10,
+    cacheTime: 1000 * 60 * 30,
   });
 
   const tabElement = [
@@ -187,13 +184,15 @@ const RecruitmentManagementPage = () => {
 
 export async function getServerSideProps() {
   const queryClient = new QueryClient();
-
-  // Prefetch only eventList for hydration (optional)
+  // Prefetch cả eventList và registerList để hydrate cache FE
   await queryClient.prefetchQuery({
     queryKey: ["eventList"],
     queryFn: () => getEventList(),
   });
-
+  await queryClient.prefetchQuery({
+    queryKey: ["registerList"],
+    queryFn: () => getRegisterList(),
+  });
   return {
     props: {
       dehydratedState: dehydrate(queryClient),

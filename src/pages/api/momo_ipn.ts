@@ -11,6 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ip: req.socket?.remoteAddress,
     body: req.body,
   });
+  
 
   if (req.method !== "POST") {
     console.error("[MoMo IPN] Method not allowed:", req.method);
