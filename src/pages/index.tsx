@@ -11,7 +11,7 @@ import { SEO } from "@/configs/seo.config";
 import { getQuoteByTeam } from "@/utils/common";
 import { updateEventsStatus } from "@/utils/eventStatus";
 import { Stack, Typography } from "@mui/material";
-import { GetStaticProps, NextPage } from "next";
+import { GetServerSideProps, NextPage } from "next";
 import { DefaultSeo } from "next-seo";
 import prisma from "@/libs/prisma";
 
@@ -57,7 +57,7 @@ const Home: NextPage<Props & { events: any[] }> = ({ quote, events }) => {
 
 export default Home;
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
   try {
     const quote = getQuoteByTeam();
     const events = await prisma.event.findMany({
