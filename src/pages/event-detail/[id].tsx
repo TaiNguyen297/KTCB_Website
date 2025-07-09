@@ -29,7 +29,7 @@ export default function EventDetailPage({ event }: { event: any }) {
       <Box className="relative" sx={{ width: "100%", position: "relative" }}>
         <Image
           className="banner"
-          src={event?.image || "/background2.jpg"}
+          src={event?.post.image}
           alt={event?.title || "KTCB Event"}
           width={1920}
           height={500}

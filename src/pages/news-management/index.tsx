@@ -24,7 +24,7 @@ export default function NewsManagementPage() {
       header: "Trạng thái",
       size: 100,
       Cell: ({ cell }) =>
-        cell.getValue() ? "Đã đăng" : "Nháp",
+        cell.getValue() ? "Đã đăng" : "Chưa đăng",
     },
   ];
 
