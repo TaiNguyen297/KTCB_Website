@@ -19,7 +19,7 @@ export default async function handler(
       // Gửi mail duyệt
       await sendMail(
         [registration.email],
-        "CẢM ƠN BẠN ĐÃ ĐĂNG KÝ THÀNH VIÊN KHOẢNG TRỜI CỦA BÉ",
+        "CẢM ƠN BẠN ĐÃ ĐĂNG KÝ THAM GIA SỰ KIỆN",
         `<p>Chào ${registration.fullName},</p>
                  <p>Cảm ơn bạn đã đăng ký tham gia sự kiện <strong>${registration.event.title}</strong>.</p>
                  <p>Chúng tôi rất vui mừng thông báo rằng đơn đăng ký của bạn đã được duyệt.</p>
