@@ -10,10 +10,9 @@ const sectionTitleStyle = { fontWeight: "bold", mb: 1, mt: 2, fontSize: 18 };
 
 interface EventReportDetailProps {
   event: any;
-  error?: string;
 }
 
-const EventReportDetail: React.FC<EventReportDetailProps> = ({ event, error }) => {
+const EventReportDetail: React.FC<EventReportDetailProps> = ({ event }) => {
   const router = useRouter();
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
@@ -36,16 +35,6 @@ const EventReportDetail: React.FC<EventReportDetailProps> = ({ event, error }) =
       setSelectedImageIndex((selectedImageIndex + 1) % event.eventResult.resultImages.length);
     }
   };
-
-  if (error) {
-    return (
-      <Box maxWidth={900} mx="auto" p={3}>
-        <Typography variant="h5" color="error" textAlign="center">
-          {error}
-        </Typography>
-      </Box>
-    );
-  }
 
   if (!event) {
     return (
@@ -279,20 +268,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     if (!id || Array.isArray(id)) {
       return {
-        props: {
-          event: null,
-          error: "ID sự kiện không hợp lệ"
-        }
+        notFound: true,
       };
     }
 
     const eventId = Number(id);
     if (isNaN(eventId)) {
       return {
-        props: {
-          event: null,
-          error: "ID sự kiện không hợp lệ"
-        }
+        notFound: true,
       };
     }
 
@@ -306,19 +289,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 
     if (!event) {
       return {
-        props: {
-          event: null,
-          error: "Không tìm thấy sự kiện"
-        }
+        notFound: true,
       };
     }
 
     if (!event.eventResult) {
       return {
-        props: {
-          event: null,
-          error: "Sự kiện này chưa có báo cáo"
-        }
+        notFound: true,
       };
     }
 
@@ -351,10 +328,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   } catch (error) {
     console.error("Error fetching event report:", error);
     return {
-      props: {
-        event: null,
-        error: "Đã có lỗi xảy ra khi tải báo cáo sự kiện"
-      }
+      notFound: true,
     };
   }
 };
