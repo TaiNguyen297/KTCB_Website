@@ -24,8 +24,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const requestId = `${Date.now()}`;
   const finalOrderInfo = orderInfo || "Thanh toán MoMo";
   
-  // Lưu thông tin donor tạm thời để sử dụng khi callback
-  // Chúng ta sẽ encode donorInfo vào extraData
   const extraData = donorInfo ? Buffer.from(JSON.stringify(donorInfo)).toString('base64') : "";
 
   const rawSignature = `accessKey=${MOMO_ACCESS_KEY}&amount=${amount}&extraData=${extraData}&ipnUrl=${MOMO_IPN_URL}&orderId=${finalOrderId}&orderInfo=${finalOrderInfo}&partnerCode=${MOMO_PARTNER_CODE}&redirectUrl=${MOMO_REDIRECT_URL}&requestId=${requestId}&requestType=${MOMO_REQUEST_TYPE}`;

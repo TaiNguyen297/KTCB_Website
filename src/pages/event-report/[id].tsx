@@ -1,24 +1,21 @@
+import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Box, Typography, Paper, Divider, Chip, LinearProgress, Grid, Avatar, Stack, Modal, IconButton } from "@mui/material";
 import { ChevronLeft, ChevronRight, Close } from "@mui/icons-material";
 import Image from "next/image";
+import prisma from "@/libs/prisma";
 
 const sectionTitleStyle = { fontWeight: "bold", mb: 1, mt: 2, fontSize: 18 };
 
-const EventReportDetail = () => {
-  const router = useRouter();
-  const { id } = router.query;
-  const [event, setEvent] = useState<any>(null);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+interface EventReportDetailProps {
+  event: any;
+  error?: string;
+}
 
-  useEffect(() => {
-    if (id) {
-      fetch(`/api/event_management?type=event&id=${id}`)
-        .then(res => res.json())
-        .then(data => setEvent(data));
-    }
-  }, [id]);
+const EventReportDetail: React.FC<EventReportDetailProps> = ({ event, error }) => {
+  const router = useRouter();
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   const handleImageClick = (index: number) => {
     setSelectedImageIndex(index);
@@ -40,7 +37,25 @@ const EventReportDetail = () => {
     }
   };
 
-  if (!event) return <Typography>Đang tải dữ liệu...</Typography>;
+  if (error) {
+    return (
+      <Box maxWidth={900} mx="auto" p={3}>
+        <Typography variant="h5" color="error" textAlign="center">
+          {error}
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (!event) {
+    return (
+      <Box maxWidth={900} mx="auto" p={3}>
+        <Typography variant="h5" textAlign="center">
+          Không tìm thấy báo cáo sự kiện
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box maxWidth={900} mx="auto">
@@ -73,10 +88,9 @@ const EventReportDetail = () => {
         {/* 2. Mô tả chi tiết */}
         <Divider sx={{ my: 2 }} />
         <Typography sx={sectionTitleStyle}>2. Tóm tắt sự kiện</Typography>
-        {event.eventResult.summary && (
+        {event.eventResult?.summary && (
           <Typography color="text.secondary" mb={1}>{event.eventResult.summary}</Typography>
         )}
-        {/* Có thể bổ sung mục tiêu, hoạt động chính, đối tượng tham gia, bên tổ chức nếu có */}
         {/* 3. Ảnh/video */}
         <Divider sx={{ my: 2 }} />
         <Typography sx={sectionTitleStyle}>3. Ảnh / video</Typography>
@@ -116,10 +130,10 @@ const EventReportDetail = () => {
         <Typography sx={sectionTitleStyle}>4. Thống kê kết quả</Typography>
         {event.type === "VOLUNTEER" ? (
           <>
-            <Typography>Số người đăng ký/tham gia: <b>{event.eventResult.totalParticipant} tình nguyện viên</b></Typography>
-            <Typography>Tổng thời gian tình nguyện: <b>{event.eventResult.totalHour} giờ</b></Typography>
+            <Typography>Số người đăng ký/tham gia: <b>{event.eventResult?.totalParticipant || 0} tình nguyện viên</b></Typography>
+            <Typography>Tổng thời gian tình nguyện: <b>{event.eventResult?.totalHour || 0} giờ</b></Typography>
             <Typography mt={2}>Thành tựu:</Typography>
-            {event.eventResult.achievements && event.eventResult.achievements.length > 0 ? (
+            {event.eventResult?.achievements && event.eventResult.achievements.length > 0 ? (
               event.eventResult.achievements.map((item: string, idx: number) => (
                 <Typography key={idx} component="li" sx={{ ml: 2, mb: 0.5 }}>• {item}</Typography>
               ))
@@ -139,7 +153,7 @@ const EventReportDetail = () => {
               </Box>
             )}
             <Typography mt={2}>Thành tựu:</Typography>
-            {event.eventResult.achievements && event.eventResult.achievements.length > 0 ? (
+            {event.eventResult?.achievements && event.eventResult.achievements.length > 0 ? (
               event.eventResult.achievements.map((item: string, idx: number) => (
                 <Typography key={idx} component="li" sx={{ ml: 2, mb: 0.5 }}>• {item}</Typography>
               ))
@@ -257,6 +271,92 @@ const EventReportDetail = () => {
       </Modal>
     </Box>
   );
+};
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.query;
+
+  try {
+    if (!id || Array.isArray(id)) {
+      return {
+        props: {
+          event: null,
+          error: "ID sự kiện không hợp lệ"
+        }
+      };
+    }
+
+    const eventId = Number(id);
+    if (isNaN(eventId)) {
+      return {
+        props: {
+          event: null,
+          error: "ID sự kiện không hợp lệ"
+        }
+      };
+    }
+
+    // Fetch event với eventResult
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        eventResult: true,
+      }
+    });
+
+    if (!event) {
+      return {
+        props: {
+          event: null,
+          error: "Không tìm thấy sự kiện"
+        }
+      };
+    }
+
+    if (!event.eventResult) {
+      return {
+        props: {
+          event: null,
+          error: "Sự kiện này chưa có báo cáo"
+        }
+      };
+    }
+
+    // Serialize dates và parse JSON fields
+    const serializedEvent = {
+      ...event,
+      startDate: event.startDate.toISOString(),
+      endDate: event.endDate.toISOString(),
+      eventResult: {
+        ...event.eventResult,
+        resultImages: event.eventResult.resultImages 
+          ? (typeof event.eventResult.resultImages === 'string' 
+              ? JSON.parse(event.eventResult.resultImages) 
+              : event.eventResult.resultImages)
+          : [],
+        achievements: event.eventResult.achievements 
+          ? (typeof event.eventResult.achievements === 'string' 
+              ? JSON.parse(event.eventResult.achievements) 
+              : event.eventResult.achievements)
+          : [],
+      }
+    };
+
+    return {
+      props: {
+        event: serializedEvent,
+      }
+    };
+
+  } catch (error) {
+    console.error("Error fetching event report:", error);
+    return {
+      props: {
+        event: null,
+        error: "Đã có lỗi xảy ra khi tải báo cáo sự kiện"
+      }
+    };
+  }
 };
 
 export default EventReportDetail;
