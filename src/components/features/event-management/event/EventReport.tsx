@@ -12,6 +12,7 @@ import EventReportForm from "./EventReportForm";
 import { Chip } from "@mui/material";
 import { addEventReport } from "./service/add-event-report";
 import { updateEventReport } from "./service/update-event-report";
+import { deleteEventReport } from "./service/delete-event-report";
 import { MODAL_TYPES, useGlobalModalContext } from "../../global-modal/GlobalModal";
 
 interface EventReportProps {
@@ -56,6 +57,23 @@ export const EventReport = ({ data, onReportAdded }: EventReportProps) => {
     }
     setShowForm(false);
     closeDetail();
+  };
+
+  const handleDeleteReport = async (event: any) => {
+    if (!event?.eventResult?.id) return;
+    
+    showModal(MODAL_TYPES.MODAL_CONFIRM, {
+      content: "Bạn có chắc chắn muốn xóa báo cáo này không?",
+      onConfirm: async () => {
+        try {
+          await deleteEventReport(event.eventResult.id);
+          showModal(MODAL_TYPES.MODAL_SUCCESS, { content: "Xóa báo cáo thành công" });
+          if (onReportAdded) onReportAdded();
+        } catch (error) {
+          showModal(MODAL_TYPES.MODAL_SUCCESS, { content: "Xóa báo cáo thất bại" });
+        }
+      }
+    });
   };
 
   const columns = useMemo<MRT_ColumnDef<any>[]>(
@@ -109,7 +127,7 @@ export const EventReport = ({ data, onReportAdded }: EventReportProps) => {
             </IconButton>
           </Tooltip>
           <Tooltip title="Xóa báo cáo">
-            <IconButton color="error">
+            <IconButton color="error" onClick={() => handleDeleteReport(event)}>
               <ClearIcon />
             </IconButton>
           </Tooltip>

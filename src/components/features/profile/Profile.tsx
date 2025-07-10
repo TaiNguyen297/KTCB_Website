@@ -77,7 +77,6 @@ export const Profile: React.FC<Props> = ({ me }) => {
       content: "Cảm ơn đã gửi thông tin",
     });
 
-    reset();
   });
 
   return (

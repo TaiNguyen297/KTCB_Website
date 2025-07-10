@@ -12,7 +12,7 @@ import { ContainerXL } from "@/components/layouts/ContainerXL";
 import ktcbBackground from "@public/mission-background.jpg";
 import { useRouter } from "next/router";
 import { DonorDonate, DonorInformation } from "./components";
-import QR from "@public/QR_Techcombank.jpg";
+import QR from "@public/QR_NguyenHuuTai.jpg";
 import { useCreateDonorRegistration } from "./hooks/useCreateDonorRegistration";
 import {
   MODAL_TYPES,

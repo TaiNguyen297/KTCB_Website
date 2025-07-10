@@ -231,6 +231,19 @@ export default async function handler(
           });
           return res.status(200).json(deleteEvent);
       }
+
+      case "DELETE": {
+        const { type, id } = req.query;
+        
+        if (type === "eventResult") {
+          const deletedReport = await prisma.eventResult.delete({
+            where: { id: Number(id) },
+          });
+          return res.status(200).json({ message: "Xóa báo cáo thành công", data: deletedReport });
+        }
+        
+        return res.status(400).json({ message: "Loại xóa không hợp lệ" });
+      }
         
       default:
         return res.status(405).end();

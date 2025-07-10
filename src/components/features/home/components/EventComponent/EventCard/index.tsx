@@ -163,29 +163,6 @@ const EventCard: React.FC<any> = ({ event }) => {
         </DialogActions>
       </Dialog>
 
-      {/* Modal detail */}
-      <Dialog open={openDetail} onClose={() => setOpenDetail(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Chi tiết sự kiện</DialogTitle>
-        <DialogContent dividers>
-          {/* Hiển thị chi tiết sự kiện, có thể custom thêm */}
-          <Typography variant="h6" fontWeight="bold" mb={2}>{event.title}</Typography>
-          <Typography variant="body1" mb={1}>{event.description}</Typography>
-          <Typography variant="body2" mb={1}>Thời gian: {format(new Date(event.startDate), "dd/MM/yyyy")} - {format(new Date(event.endDate), "dd/MM/yyyy")}</Typography>
-          <Typography variant="body2" mb={1}>Địa điểm: {event.location}</Typography>
-          {event.mapLink && (
-            <Typography variant="body2" mb={1}>
-              <a href={event.mapLink} target="_blank" rel="noopener noreferrer" style={{ color: '#1976d2', textDecoration: 'underline' }}>
-                Xem bản đồ
-              </a>
-            </Typography>
-          )}
-          {/* Có thể bổ sung thêm các trường khác nếu cần */}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDetail(false)}>Đóng</Button>
-        </DialogActions>
-      </Dialog>
-
       <ToastSuccess
         open={openModal}
         onClose={() => setOpenModal(false)}

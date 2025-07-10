@@ -104,7 +104,7 @@ const DonationCard: React.FC<Props> = ({ event }) => {
             color="primary"
             sx={{ borderRadius: 2, flex: 1 }}
             onClick={() => setOpenForm(true)}
-            disabled={event.type !== "DONATION"}
+            disabled={event.type !== "DONATION" || event.status === "FINISHED"}
           >
             Quyên góp ngay
           </Button>
@@ -117,15 +117,23 @@ const DonationCard: React.FC<Props> = ({ event }) => {
           >
             Xem chi tiết
           </Button>
+          {event.status === "FINISHED" && (
+            <Button
+              variant="outlined"
+              color="info"
+              sx={{ borderRadius: 2, flex: 1 }}
+              onClick={() => window.location.href = `/event-report/${event.id}`}
+            >
+              Xem báo cáo
+            </Button>
+          )}
         </Box>
         <DonationForm
           open={openForm}
           onClose={() => setOpenForm(false)}
           eventTitle={event.title}
-          eventId={event.id} // Truyền eventId động
+          eventId={event.id} 
           onSubmit={(values) => {
-            // TODO: Gọi API quyên góp ở đây, truyền eventId, values
-            // Ví dụ: donateToEvent({ ...values, eventId: event.id })
             setOpenForm(false);
           }}
         />
