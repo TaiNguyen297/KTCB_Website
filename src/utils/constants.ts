@@ -40,6 +40,23 @@ export const ACTIONS = {
   UN_ACCEPT: "un_accept",
 };
 
+export const TEXT_TOAST = {
+  NEWS_DELETE_SUCCESS: "Xóa bài viết thành công!",
+  NEWS_UPDATE_SUCCESS: "Cập nhật bài viết thành công!",
+  NEWS_CREATE_SUCCESS: "Tạo bài viết thành công!",
+  DELETE_SUCCESS: "Xóa thành công!",
+  UPDATE_SUCCESS: "Cập nhật thành công!",
+  CREATE_SUCCESS: "Tạo thành công!",
+  ERROR: "Có lỗi xảy ra, vui lòng thử lại!",
+};
+
+export const TEXT_CONFIRM = {
+  DELETE_NEWS: "Bạn có chắc chắn muốn xóa bài viết này?",
+  DELETE_ITEM: "Bạn có chắc chắn muốn xóa mục này?",
+  ACCEPT_REGISTRATION: "Bạn có chắc chắn muốn duyệt đăng ký này?",
+  REJECT_REGISTRATION: "Bạn có chắc chắn muốn từ chối đăng ký này?",
+};
+
 export const STATUS_OF_EXPENSE = {
   PENDING: "pending",
   ACCEPTED: "accepted",
