@@ -71,7 +71,7 @@ model Event {
   eventRegistrations EventRegistration[]
   eventResult       EventResult?
   donations         Donation[]       // Chỉ dùng cho DONATION
-  postId            Int?            1-n: nhiều sự kiện có thể dùng chung 1 bài viết
+  postId            Int?           // 1-n: nhiều sự kiện có thể dùng chung 1 bài viết
   post              Post?            @relation(fields: [postId], references: [id])
 }
 
