@@ -14,7 +14,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     include: { post: true },
   });
   if (!event || !event.postId) return { notFound: true };
-  // Chuyển đổi các trường Date thành string để tránh lỗi serialize
+
   const safeEvent = {
     ...event,
     startDate: event.startDate ? event.startDate.toISOString() : null,
@@ -57,7 +57,7 @@ export default function EventDetailPage({ event }: { event: any }) {
                 <strong>{event.author || "Nguyễn Hữu Tài"}</strong>
               </div>
               <h1 className="news-title text-4xl">{event?.title}</h1>
-              {/* Nếu có bài viết chi tiết thì render nội dung bài viết */}
+
               {event.post ? (
                 <Box mb={2}>
                   <Typography
@@ -86,9 +86,8 @@ export default function EventDetailPage({ event }: { event: any }) {
                 <Typography variant="body1">{event.description}</Typography>
               )}
             </div>
-            {/* Sidebar: có thể thêm tin liên quan ở đây nếu muốn */}
             <div className="flex flex-col align-center justify-start gap-4 lg:px-6 lg:w-1/4 pr-4 pl-4 w-full lg:mt-0 mt-4">
-              {/* Để trống hoặc render các sự kiện liên quan nếu muốn */}
+
             </div>
           </div>
         </section>
