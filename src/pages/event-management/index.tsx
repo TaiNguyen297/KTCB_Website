@@ -2,18 +2,17 @@ import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { NextPage } from "next";
 import { DefaultSeo } from "next-seo";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { ContainerXL } from "@/components/layouts/ContainerXL";
 import ToastSuccess from "@/components/shared/toasts/ToastSuccess";
 import { SEO } from "@/configs/seo.config";
 import { Box, Button, Typography, CircularProgress } from "@mui/material";
-import { QueryClient, dehydrate, useQuery } from "@tanstack/react-query";
+import { QueryClient, dehydrate, useQuery, useQueryClient } from "@tanstack/react-query";
 import { EventManagementTable } from "@/components/features/event-management/event/EventManagementTable";
 import { RegisterTable } from "@/components/features/event-management/register/RegisterTable";
 import { getEventList } from "@/components/features/event-management/event/service/get-event-list";
 import { getRegisterList } from "@/components/features/event-management/register/service/get-register-list";
-import { getPersonInterview } from "@/components/features/recruitment-management/services/get-member-registration";
 import EventReport from "@/components/features/event-management/event/EventReport";
 
 const TAB_EVENT = 0;
@@ -23,13 +22,11 @@ const TAB_REPORT = 2;
 const RecruitmentManagementPage = () => {
   const [open, setOpen] = useState(false);
   const router = useRouter();
-  const { data: session } = useSession({
-    required: true,
-    onUnauthenticated() {
-      router.push("/login");
-    },
-  });
-
+  const queryClient = useQueryClient();
+  
+  // Tối ưu session check - không block render
+  const { data: session, status } = useSession();
+  
   const { watch, setValue } = useForm<{ tabIndex: number }>({
     defaultValues: {
       tabIndex: 0,
@@ -37,7 +34,16 @@ const RecruitmentManagementPage = () => {
   });
   const tabIndex = watch("tabIndex");
 
-  // Prefetch cả eventList và registerList, luôn enable để cache sẵn
+  // Prefetch function để tối ưu UX
+  const prefetchRegisterList = useCallback(() => {
+    queryClient.prefetchQuery({
+      queryKey: ["registerList"],
+      queryFn: () => getRegisterList(),
+      staleTime: 1000 * 60 * 10,
+    });
+  }, [queryClient]);
+
+  // Chỉ load dữ liệu khi cần thiết theo tab
   const {
     data: eventData,
     isLoading: isEventLoading,
@@ -47,6 +53,7 @@ const RecruitmentManagementPage = () => {
     queryFn: () => getEventList(),
     staleTime: 1000 * 60 * 10, // 10 phút
     cacheTime: 1000 * 60 * 30, // 30 phút
+    // Luôn enable vì eventData cần cho cả tab EVENT và REPORT
   });
 
   const {
@@ -57,7 +64,28 @@ const RecruitmentManagementPage = () => {
     queryFn: () => getRegisterList(),
     staleTime: 1000 * 60 * 10,
     cacheTime: 1000 * 60 * 30,
+    // Chỉ load khi user click vào tab REGISTER
+    enabled: tabIndex === TAB_REGISTER,
   });
+
+  // Redirect nếu chưa login, nhưng không block render
+  if (status === "unauthenticated") {
+    router.push("/login");
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Show loading khi đang check session
+  if (status === "loading") {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   const tabElement = [
     {
@@ -75,7 +103,7 @@ const RecruitmentManagementPage = () => {
       ),
     },
     {
-      element: isRegisterLoading ? (
+      element: (tabIndex === TAB_REGISTER && isRegisterLoading) ? (
         <Box
           display="flex"
           justifyContent="center"
@@ -105,12 +133,7 @@ const RecruitmentManagementPage = () => {
   ];
 
   if (!session) {
-    return (
-      <div>
-        {/* TODO: Them icon loading */}
-        Đang tải...
-      </div>
-    );
+    return null; // Không cần render gì vì đã redirect
   }
 
   return (
@@ -144,7 +167,13 @@ const RecruitmentManagementPage = () => {
             }}
             disabled={tabIndex === TAB_REGISTER}
             color="secondary"
-            onClick={() => setValue("tabIndex", TAB_REGISTER)}
+            onClick={() => {
+              setValue("tabIndex", TAB_REGISTER);
+            }}
+            onMouseEnter={() => {
+              // Prefetch on hover để tăng tốc độ
+              prefetchRegisterList();
+            }}
           >
             Danh sách đăng ký
           </Button>
@@ -184,15 +213,14 @@ const RecruitmentManagementPage = () => {
 
 export async function getServerSideProps() {
   const queryClient = new QueryClient();
-  // Prefetch cả eventList và registerList để hydrate cache FE
+  
+  // Chỉ prefetch eventList vì nó luôn cần (tab đầu tiên và tab báo cáo)
+  // registerList sẽ được load lazy khi user click vào tab
   await queryClient.prefetchQuery({
     queryKey: ["eventList"],
     queryFn: () => getEventList(),
   });
-  await queryClient.prefetchQuery({
-    queryKey: ["registerList"],
-    queryFn: () => getRegisterList(),
-  });
+  
   return {
     props: {
       dehydratedState: dehydrate(queryClient),
